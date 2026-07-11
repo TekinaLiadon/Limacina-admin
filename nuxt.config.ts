@@ -9,11 +9,12 @@ export default defineNuxtConfig({
     },
   },
   app: {
+    baseURL: '/panel',
     head: {
       htmlAttrs: { lang: 'ru' },
       title: 'Limacina',
       link: [
-        { rel: 'icon', type: 'image/svg+xml', href: '/icon.svg' },
+        { rel: 'icon', type: 'image/svg+xml', href: '/panel/icon.svg' },
       ],
     },
   },
