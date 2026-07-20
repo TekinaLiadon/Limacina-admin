@@ -21,9 +21,10 @@ const defaultConfig = (): LauncherConfig => ({
 })
 
 export const useLauncherConfig = () => {
-  const { get, patch } = useApi()
+  const { get, post, patch } = useApi()
 
   const config = ref<any>(null)
+  const isNew = ref(false)
   const loading = ref(true)
   const error = ref('')
   const form = reactive<LauncherConfig>(defaultConfig())
@@ -38,9 +39,10 @@ export const useLauncherConfig = () => {
 
     try {
       const res = await get<any>('/launcher/config')
-      config.value = res.data.value
 
-      if (config.value) {
+      if (res.data.value) {
+        config.value = res.data.value
+        isNew.value = false
         Object.assign(form, {
           projectName: config.value.projectName || '',
           mcVersion: config.value.mcVersion || '',
@@ -51,6 +53,10 @@ export const useLauncherConfig = () => {
           online: config.value.online ?? null,
           jvmArgs: config.value.jvmArgs?.join(' ') || '',
         })
+      } else {
+        config.value = null
+        isNew.value = true
+        Object.assign(form, defaultConfig())
       }
     } finally {
       loading.value = false
@@ -63,7 +69,7 @@ export const useLauncherConfig = () => {
     saveSuccess.value = ''
 
     try {
-      await patch('/admin/config', {
+      const body = {
         projectName: form.projectName,
         mcVersion: form.mcVersion,
         modLoader: form.modLoader,
@@ -72,8 +78,17 @@ export const useLauncherConfig = () => {
         maxMemory: form.maxMemory,
         online: form.online,
         jvmArgs: form.jvmArgs.split(/\s+/).filter(Boolean),
-      })
-      saveSuccess.value = 'Конфиг обновлён'
+      }
+
+      if (isNew.value) {
+        await post('/launcher/config', body)
+        saveSuccess.value = 'Конфиг создан'
+        isNew.value = false
+        config.value = body
+      } else {
+        await patch('/admin/config', body)
+        saveSuccess.value = 'Конфиг обновлён'
+      }
     } catch (e: any) {
       saveError.value = e?.data?.errorMessage || e?.message || 'Ошибка сохранения'
     } finally {
@@ -82,7 +97,7 @@ export const useLauncherConfig = () => {
   }
 
   return {
-    config, loading, error, form,
+    config, isNew, loading, error, form,
     saving, saveError, saveSuccess,
     fetchConfig, saveConfig,
   }

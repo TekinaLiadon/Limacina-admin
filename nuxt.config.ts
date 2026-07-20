@@ -1,3 +1,4 @@
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   ssr: false,
@@ -5,8 +6,8 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.scss'],
   runtimeConfig: {
     public: {
-      apiBase: '',
-    },
+      apiBase: "",
+    }
   },
   app: {
     baseURL: '/panel',
