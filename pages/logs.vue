@@ -12,25 +12,19 @@
       @limit-change="fetchLogs"
     />
 
-    <AppSpinner v-if="loading" />
-    <AppAlert v-else-if="error" :message="error" type="error" />
-
-    <WidgetLogTable
-      v-else-if="parsedLines.length"
-      :parsed-lines="parsedLines"
-      :expanded-row="expandedRow"
-      :offset="offset"
-      :limit="limit"
-      :total="total"
-      :current-page="currentPage"
-      :total-pages="totalPages"
-      @toggle-row="toggleRow"
-      @go-to-page="goToPage"
-    />
-
-    <div v-else class="card empty-logs">
-      Нет логов за выбранную дату
-    </div>
+    <AppDataState :loading="loading" :error="error" :empty="!parsedLines.length" empty-text="Нет логов за выбранную дату">
+      <WidgetLogTable
+        :parsed-lines="parsedLines"
+        :expanded-row="expandedRow"
+        :offset="offset"
+        :limit="limit"
+        :total="total"
+        :current-page="currentPage"
+        :total-pages="totalPages"
+        @toggle-row="toggleRow"
+        @go-to-page="goToPage"
+      />
+    </AppDataState>
   </div>
 </template>
 
@@ -48,11 +42,3 @@ const {
 
 onMounted(fetchDates)
 </script>
-
-<style lang="scss" scoped>
-.empty-logs {
-  padding: 32px;
-  text-align: center;
-  color: var(--text-muted);
-}
-</style>

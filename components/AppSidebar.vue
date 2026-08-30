@@ -15,7 +15,6 @@
         :class="{ active: route.path === item.path, disabled: item.disabled }"
         @click="$emit('close')"
       >
-        <span class="nav-icon">{{ item.icon }}</span>
         <span>{{ item.label }}</span>
       </NuxtLink>
     </nav>
@@ -44,7 +43,7 @@ const route = useRoute()
     display: block;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(11, 14, 18, 0.7);
     z-index: 9;
   }
 }
@@ -80,51 +79,49 @@ const route = useRoute()
 }
 
 .brand-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-sm);
+  width: 28px;
+  height: 28px;
 }
 
 .brand-text {
   font-size: 0.9375rem;
-  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--text-bright);
 }
 
 .sidebar-nav {
-  padding: 12px 8px;
+  padding: 12px 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: var(--radius-sm);
+  padding: 9px 20px;
+  border-left: 1px solid transparent;
   color: var(--text-muted);
-  font-size: 0.875rem;
-  transition: all 0.15s;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.058em;
+  text-transform: uppercase;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
 
   &:hover:not(.disabled) {
+    color: var(--text-bright);
     background: var(--bg-hover);
-    color: var(--text);
   }
 
   &.disabled {
-    opacity: 0.4;
+    opacity: 0.35;
     cursor: not-allowed;
     pointer-events: none;
   }
 
   &.active {
-    background: var(--primary);
-    color: white;
+    border-left-color: var(--primary);
+    color: var(--primary);
+    background: var(--bg-hover);
   }
-}
-
-.nav-icon {
-  font-size: 1rem;
 }
 </style>

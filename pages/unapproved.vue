@@ -1,10 +1,13 @@
 <template>
   <WidgetUnapprovedTable
     :users="users"
+    :page="page"
+    :total="total"
+    :total-pages="totalPages"
     :loading="loading"
     :error="error"
     :approving="approving"
-    :format-date="formatDate"
+    @go-to-page="goToPage"
     @refresh="fetchUsers"
     @approve="approveUser"
   />
@@ -15,7 +18,7 @@ definePageMeta({
   layout: 'admin',
 })
 
-const { users, error, loading, approving, fetchUsers, approveUser, formatDate } = useUnapprovedUsers()
+const { users, page, total, totalPages, error, loading, approving, fetchUsers, goToPage, approveUser } = useUnapprovedUsers()
 
 onMounted(fetchUsers)
 </script>

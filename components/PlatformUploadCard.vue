@@ -43,7 +43,7 @@ const onChange = (e: Event) => {
   transition: border-color 0.15s;
 
   &.has-file {
-    border-color: var(--success);
+    border-color: rgba(0, 216, 146, 0.5);
   }
 }
 
@@ -54,44 +54,51 @@ const onChange = (e: Event) => {
 }
 
 .platform-name {
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.058em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
 .platform-ext {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-faint);
 }
 
 .file-upload-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 14px;
+  padding: 6px 10px;
   background: var(--bg-secondary);
   border: 1px dashed var(--border);
   border-radius: var(--radius-sm);
-  font-size: 0.8125rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.053em;
+  text-transform: uppercase;
   color: var(--text-muted);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: border-color 0.15s, color 0.15s;
 
   &:hover {
     border-color: var(--primary);
-    color: var(--text);
-    background: var(--bg-hover);
+    color: var(--primary);
   }
 
   &.has-file {
     border-style: solid;
-    border-color: var(--success);
-    color: var(--success);
+    border-color: rgba(0, 216, 146, 0.5);
+    color: var(--primary);
   }
 }
 
 .file-name {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-faint);
   word-break: break-all;
   line-height: 1.4;
 

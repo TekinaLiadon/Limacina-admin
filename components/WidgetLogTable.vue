@@ -32,9 +32,14 @@
                 <span v-else class="text-muted">—</span>
               </td>
               <td class="col-expand">
-                <button class="btn btn-ghost btn-sm expand-btn" @click.stop="$emit('toggleRow', i)">
+                <AppButton
+                  variant="ghost"
+                  size="sm"
+                  class="expand-btn"
+                  @click.stop="$emit('toggleRow', i)"
+                >
                   {{ expandedRow === i ? 'Свернуть' : 'Подробнее' }}
-                </button>
+                </AppButton>
               </td>
             </tr>
             <WidgetLogDetail
@@ -73,40 +78,14 @@
       </div>
     </div>
 
-    <div v-if="totalPages > 1" class="logs-pagination">
-      <span class="logs-info">
-        {{ offset + 1 }}–{{ Math.min(offset + limit, total) }} из {{ total }}
-      </span>
-
-      <div class="page-controls">
-        <button
-          class="btn btn-ghost btn-sm"
-          :disabled="currentPage <= 1"
-          @click="$emit('goToPage', currentPage - 1)"
-        >
-          ←
-        </button>
-
-        <template v-for="page in pageNumbers" :key="page">
-          <span v-if="page === '...'" class="page-dots">...</span>
-          <button
-            v-else
-            :class="['btn', 'btn-sm', page === currentPage ? 'btn-primary' : 'btn-ghost']"
-            @click="$emit('goToPage', Number(page))"
-          >
-            {{ page }}
-          </button>
-        </template>
-
-        <button
-          class="btn btn-ghost btn-sm"
-          :disabled="currentPage >= totalPages"
-          @click="$emit('goToPage', currentPage + 1)"
-        >
-          →
-        </button>
-      </div>
-    </div>
+    <AppPagination
+      embedded
+      :page="currentPage"
+      :per-page="limit"
+      :total="total"
+      :total-pages="totalPages"
+      @go-to-page="$emit('goToPage', $event)"
+    />
   </div>
 </template>
 
@@ -116,7 +95,7 @@ import {
   levelName, levelBadge, statusBadge, rowClass, formatTime,
 } from '~/utils/logHelpers'
 
-const props = defineProps<{
+defineProps<{
   parsedLines: LogEntry[]
   expandedRow: number | null
   offset: number
@@ -130,31 +109,6 @@ defineEmits<{
   toggleRow: [index: number]
   goToPage: [page: number]
 }>()
-
-const pageNumbers = computed(() => {
-  const { currentPage, totalPages } = props
-  const pages: (number | string)[] = []
-
-  if (totalPages <= 7) {
-    for (let i = 1; i <= totalPages; i++) pages.push(i)
-    return pages
-  }
-
-  pages.push(1)
-
-  if (currentPage > 3) pages.push('...')
-
-  const start = Math.max(2, currentPage - 1)
-  const end = Math.min(totalPages - 1, currentPage + 1)
-
-  for (let i = start; i <= end; i++) pages.push(i)
-
-  if (currentPage < totalPages - 2) pages.push('...')
-
-  pages.push(totalPages)
-
-  return pages
-})
 </script>
 
 <style lang="scss" scoped>
@@ -165,26 +119,11 @@ const pageNumbers = computed(() => {
   overflow: hidden;
 }
 
-.desktop-table {
-  @include mobile {
-    display: none;
-  }
-}
-
-.mobile-cards {
-  display: none;
-
-  @include mobile {
-    display: flex;
-    flex-direction: column;
-  }
-}
-
 .logs-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.8125rem;
-  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
 
   th {
     position: sticky;
@@ -243,7 +182,6 @@ const pageNumbers = computed(() => {
 
 .col-method {
   width: 60px;
-  font-weight: 600;
   text-transform: uppercase;
   color: var(--primary);
   white-space: nowrap;
@@ -286,11 +224,11 @@ const pageNumbers = computed(() => {
 }
 
 .row-error td {
-  background: rgba(239, 68, 68, 0.05);
+  background: rgba(255, 98, 133, 0.04);
 }
 
 .row-warn td {
-  background: rgba(245, 158, 11, 0.05);
+  background: rgba(212, 168, 67, 0.04);
 }
 
 .log-card {
@@ -304,11 +242,11 @@ const pageNumbers = computed(() => {
   }
 
   &.row-error {
-    background: rgba(239, 68, 68, 0.05);
+    background: rgba(255, 98, 133, 0.04);
   }
 
   &.row-warn {
-    background: rgba(245, 158, 11, 0.05);
+    background: rgba(212, 168, 67, 0.04);
   }
 }
 
@@ -320,22 +258,22 @@ const pageNumbers = computed(() => {
 }
 
 .log-card-time {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   color: var(--text-muted);
-  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
 }
 
 .log-card-method {
-  font-size: 0.8125rem;
-  font-weight: 600;
+  font-size: 0.75rem;
   text-transform: uppercase;
   color: var(--primary);
+  font-family: var(--font-mono);
   margin-bottom: 2px;
 }
 
 .log-card-url {
-  font-size: 0.8125rem;
-  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
   word-break: break-all;
   line-height: 1.4;
   margin-bottom: 8px;
@@ -348,42 +286,16 @@ const pageNumbers = computed(() => {
 }
 
 .log-card-time-value {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   color: var(--text-muted);
+  font-family: var(--font-mono);
 }
 
 .log-card-expand {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   color: var(--primary);
-}
-
-.logs-pagination {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 20px;
-  border-top: 1px solid var(--border);
-
-  @include mobile {
-    flex-direction: column;
-    gap: 12px;
-  }
-}
-
-.logs-info {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-}
-
-.page-controls {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.page-dots {
-  padding: 0 6px;
-  color: var(--text-muted);
-  font-size: 0.875rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.053em;
+  text-transform: uppercase;
 }
 </style>

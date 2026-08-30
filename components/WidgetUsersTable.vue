@@ -1,104 +1,92 @@
 <template>
-  <div>
-    <AppSpinner v-if="loading" />
-    <AppAlert v-else-if="error" :message="error" type="error" />
+  <AppDataState :loading="loading" :error="error" :empty="!users.length" empty-text="Нет пользователей">
+    <AppResponsiveList :items="users" :columns="columns" :item-key="userKey">
+      <template #row="{ item }">
+        <tr>
+          <td>{{ item.username }}</td>
+          <td>
+            <template v-if="item.role === 'owner'">
+              <span class="badge badge-owner">owner</span>
+            </template>
+            <select
+              v-else
+              class="input role-select"
+              :value="item.role"
+              :disabled="acting === item.username"
+              @change="$emit('changeRole', item, ($event.target as HTMLSelectElement).value)"
+            >
+              <option value="admin">admin</option>
+              <option value="moderator">moderator</option>
+              <option value="user">user</option>
+            </select>
+          </td>
+          <td>
+            <select
+              class="input role-select"
+              :value="String(item.approved)"
+              :disabled="acting === item.username || item.role === 'owner'"
+              @change="$emit('changeApproved', item, ($event.target as HTMLSelectElement).value === 'true')"
+            >
+              <option value="true">Одобрен</option>
+              <option value="false">Не одобрен</option>
+            </select>
+          </td>
+          <td>
+            <select
+              class="input role-select"
+              :value="String(item.banned)"
+              :disabled="acting === item.username || item.role === 'owner'"
+              @change="$emit('changeBanned', item, ($event.target as HTMLSelectElement).value === 'true')"
+            >
+              <option value="false">Нет</option>
+              <option value="true">Да</option>
+            </select>
+          </td>
+          <td>
+            <AppButton
+              variant="danger"
+              size="sm"
+              :loading="acting === item.username"
+              :disabled="item.role === 'owner'"
+              @click="$emit('deleteUser', item)"
+            >
+              Удалить
+            </AppButton>
+          </td>
+        </tr>
+      </template>
 
-    <div v-else class="card table-wrap">
-      <table class="desktop-table">
-        <thead>
-          <tr>
-            <th>Имя пользователя</th>
-            <th>Роль</th>
-            <th>Одобрение</th>
-            <th>Бан</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="user in users" :key="user.username">
-            <td>{{ user.username }}</td>
-            <td>
-              <template v-if="user.role === 'owner'">
-                <span class="badge badge-owner">owner</span>
-              </template>
-              <select
-                v-else
-                class="input role-select"
-                :value="user.role"
-                :disabled="acting === user.username"
-                @change="$emit('changeRole', user, ($event.target as HTMLSelectElement).value)"
-              >
-                <option value="admin">admin</option>
-                <option value="moderator">moderator</option>
-                <option value="user">user</option>
-              </select>
-            </td>
-            <td>
-              <select
-                class="input role-select"
-                :value="String(user.approved)"
-                :disabled="acting === user.username || user.role === 'owner'"
-                @change="$emit('changeApproved', user, ($event.target as HTMLSelectElement).value === 'true')"
-              >
-                <option value="true">Одобрен</option>
-                <option value="false">Не одобрен</option>
-              </select>
-            </td>
-            <td>
-              <select
-                class="input role-select"
-                :value="String(user.banned)"
-                :disabled="acting === user.username || user.role === 'owner'"
-                @change="$emit('changeBanned', user, ($event.target as HTMLSelectElement).value === 'true')"
-              >
-                <option value="false">Нет</option>
-                <option value="true">Да</option>
-              </select>
-            </td>
-            <td>
-              <button
-                class="btn btn-danger btn-sm"
-                :disabled="acting === user.username || user.role === 'owner'"
-                @click="$emit('deleteUser', user)"
-              >
-                <span v-if="acting === user.username" class="spinner"></span>
-                <span v-else>Удалить</span>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="mobile-cards">
-        <div v-for="user in users" :key="user.username" class="user-card">
+      <template #card="{ item }">
+        <div class="user-card">
           <div class="user-card-header">
-            <span class="user-card-name">{{ user.username }}</span>
-            <span v-if="user.role === 'owner'" class="badge badge-owner">owner</span>
+            <span class="user-card-name">{{ item.username }}</span>
+            <span v-if="item.role === 'owner'" class="badge badge-owner">owner</span>
           </div>
 
           <div class="user-card-fields">
             <div class="user-card-field">
               <label>Роль</label>
               <select
-                v-if="user.role !== 'owner'"
+                v-if="item.role !== 'owner'"
                 class="input role-select"
-                :value="user.role"
-                :disabled="acting === user.username"
-                @change="$emit('changeRole', user, ($event.target as HTMLSelectElement).value)"
+                :value="item.role"
+                :disabled="acting === item.username"
+                @change="$emit('changeRole', item, ($event.target as HTMLSelectElement).value)"
               >
                 <option value="admin">admin</option>
                 <option value="moderator">moderator</option>
                 <option value="user">user</option>
               </select>
+              <span v-else class="badge badge-owner">owner</span>
             </div>
 
             <div class="user-card-field">
               <label>Одобрение</label>
               <select
                 class="input role-select"
-                :value="String(user.approved)"
-                :disabled="acting === user.username || user.role === 'owner'"
-                @change="$emit('changeApproved', user, ($event.target as HTMLSelectElement).value === 'true')"
+                :value="String(item.approved)"
+                :disabled="acting === item.username || item.role === 'owner'"
+                @change="$emit('changeApproved', item, ($event.target as HTMLSelectElement).value === 'true')"
               >
                 <option value="true">Одобрен</option>
                 <option value="false">Не одобрен</option>
@@ -109,9 +97,9 @@
               <label>Бан</label>
               <select
                 class="input role-select"
-                :value="String(user.banned)"
-                :disabled="acting === user.username || user.role === 'owner'"
-                @change="$emit('changeBanned', user, ($event.target as HTMLSelectElement).value === 'true')"
+                :value="String(item.banned)"
+                :disabled="acting === item.username || item.role === 'owner'"
+                @change="$emit('changeBanned', item, ($event.target as HTMLSelectElement).value === 'true')"
               >
                 <option value="false">Нет</option>
                 <option value="true">Да</option>
@@ -119,60 +107,62 @@
             </div>
           </div>
 
-          <button
-            v-if="user.role !== 'owner'"
-            class="btn btn-danger btn-sm user-card-delete"
-            :disabled="acting === user.username"
-            @click="$emit('deleteUser', user)"
+          <AppButton
+            v-if="item.role !== 'owner'"
+            variant="danger"
+            size="sm"
+            class="user-card-delete"
+            :loading="acting === item.username"
+            @click="$emit('deleteUser', item)"
           >
-            <span v-if="acting === user.username" class="spinner"></span>
-            <span v-else>Удалить</span>
-          </button>
+            Удалить
+          </AppButton>
         </div>
-      </div>
-    </div>
-  </div>
+      </template>
+    </AppResponsiveList>
+
+    <AppPagination
+      :page="page"
+      :per-page="USERS_PER_PAGE"
+      :total="total"
+      :total-pages="totalPages"
+      @go-to-page="$emit('goToPage', $event)"
+    />
+  </AppDataState>
 </template>
 
 <script setup lang="ts">
-import type { UserListItem } from '~/composables/useUsers'
+import type { UserListItem } from '~/api/types'
+import { USERS_PER_PAGE } from '~/composables/useUsers'
 
 defineProps<{
   users: UserListItem[]
+  page: number
+  total: number
+  totalPages: number
   loading: boolean
   error: string
   acting: string
 }>()
 
 defineEmits<{
+  goToPage: [page: number]
   changeRole: [user: UserListItem, role: string]
   changeApproved: [user: UserListItem, approved: boolean]
   changeBanned: [user: UserListItem, banned: boolean]
   deleteUser: [user: UserListItem]
 }>()
+
+const columns = ['Имя пользователя', 'Роль', 'Одобрение', 'Бан', '']
+
+const userKey = (user: UserListItem) => user.username
 </script>
 
 <style lang="scss" scoped>
 @use '~/assets/css/mixins' as *;
 
-.desktop-table {
-  @include mobile {
-    display: none;
-  }
-}
-
-.mobile-cards {
-  display: none;
-
-  @include mobile {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-}
-
 .user-card {
-  background: var(--bg);
+  background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 16px;
@@ -186,8 +176,8 @@ defineEmits<{
 }
 
 .user-card-name {
-  font-weight: 600;
   font-size: 0.9375rem;
+  color: var(--text-bright);
 }
 
 .user-card-fields {
@@ -203,22 +193,23 @@ defineEmits<{
   gap: 4px;
 
   label {
-    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.058em;
+    text-transform: uppercase;
     color: var(--text-muted);
   }
 }
 
 .user-card-delete {
   width: 100%;
-  justify-content: center;
 }
 
 .role-select {
   width: auto;
   min-width: 110px;
-  padding: 4px 8px;
-  font-size: 0.8125rem;
-  cursor: pointer;
+  padding: 4px 26px 4px 8px;
+  font-size: 0.75rem;
 
   @include mobile {
     min-width: 0;
@@ -227,10 +218,9 @@ defineEmits<{
 }
 
 .badge-owner {
-  background: rgba(99, 102, 241, 0.15);
-  color: var(--primary);
-  padding: 4px 12px;
-  font-weight: 600;
-  font-size: 0.8125rem;
+  background: var(--bg-secondary);
+  color: var(--violet);
+  padding: 2px 8px;
+  box-shadow: inset 0 0 0 1px rgba(197, 138, 255, 0.22);
 }
 </style>

@@ -37,14 +37,14 @@
         />
       </div>
 
-      <button
+      <AppButton
         type="submit"
-        class="btn btn-primary"
-        :disabled="uploading || !form.version"
+        variant="primary"
+        :loading="uploading"
+        :disabled="!form.version"
       >
-        <span v-if="uploading" class="spinner"></span>
-        <span v-else>Обновить</span>
-      </button>
+        Обновить
+      </AppButton>
     </form>
   </div>
 </template>
@@ -66,15 +66,6 @@ defineEmits<{
 
 <style lang="scss" scoped>
 @use '~/assets/css/mixins' as *;
-
-.widget-title {
-  font-size: 1rem;
-  margin-bottom: 16px;
-}
-
-.card + .card {
-  margin-top: 24px;
-}
 
 .upload-form {
   display: flex;

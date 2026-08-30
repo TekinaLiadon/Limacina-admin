@@ -1,16 +1,15 @@
 export interface NavItem {
   path: string
   label: string
-  icon: string
   disabled?: boolean
 }
 
 export const navItems: NavItem[] = [
-  { path: '/unapproved', label: 'Неодобренные', icon: '⏳' },
-  { path: '/users', label: 'Пользователи', icon: '👥' },
-  { path: '/notifications', label: 'Нотификации', icon: '🔔', disabled: true },
-  { path: '/releases', label: 'Релизы', icon: '📦' },
-  { path: '/logs', label: 'Логи', icon: '📋' },
+  { path: '/unapproved', label: 'Неодобренные' },
+  { path: '/users', label: 'Пользователи' },
+  { path: '/notifications', label: 'Нотификации', disabled: true },
+  { path: '/releases', label: 'Релизы' },
+  { path: '/logs', label: 'Логи' },
 ]
 
 export const navTitles: Record<string, string> = {

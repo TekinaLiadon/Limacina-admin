@@ -10,7 +10,7 @@
         <a
           v-for="p in version.platforms"
           :key="`${p.os}-${p.arch}`"
-          :href="getDownloadUrl(p.os, p.arch)"
+          :href="downloadUrl(p.os, p.arch)"
           class="version-platform-card"
           target="_blank"
         >
@@ -19,35 +19,29 @@
         </a>
       </div>
     </div>
-    <div v-else class="empty-state padded">
+    <div v-else class="empty-state">
       <p>Не удалось загрузить информацию о версии</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ApiEndpoint, endpointUrl } from '~/api/endpoints'
+import type { LauncherVersion } from '~/api/types'
+import { capitalize } from '~/utils/format'
+
 defineProps<{
-  version: any
-  getDownloadUrl: (os: string, arch: string) => string
-  capitalize: (s: string) => string
+  version: LauncherVersion | null
 }>()
+
+const config = useRuntimeConfig()
+
+const downloadUrl = (os: string, arch: string) =>
+  `${config.public.apiBase}${endpointUrl(ApiEndpoint.LauncherDownload, { os, arch })}`
 </script>
 
 <style lang="scss" scoped>
 @use '~/assets/css/mixins' as *;
-
-.widget-title {
-  font-size: 1rem;
-  margin-bottom: 16px;
-}
-
-.card + .card {
-  margin-top: 24px;
-}
-
-.padded {
-  padding: 24px;
-}
 
 .version-info {
   display: flex;
@@ -57,8 +51,22 @@ defineProps<{
 
 .version-row {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.config-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.058em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.version-row span:last-child {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--primary);
 }
 
 .version-platforms {
@@ -83,12 +91,11 @@ defineProps<{
   text-decoration: none;
   overflow: hidden;
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
+  transition: border-color 0.2s;
   height: 44px;
 
   &:hover {
-    border-color: var(--primary);
-    background: var(--bg-hover);
+    border-color: rgba(0, 216, 146, 0.5);
   }
 }
 
@@ -102,11 +109,21 @@ defineProps<{
 .platform-label {
   opacity: 1;
   transform: translateY(0);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.058em;
+  text-transform: uppercase;
+  color: var(--text);
 }
 
 .platform-download {
   opacity: 0;
   transform: translateY(12px);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.058em;
+  text-transform: uppercase;
+  color: var(--primary);
 }
 
 .version-platform-card:hover .platform-label {
@@ -117,8 +134,5 @@ defineProps<{
 .version-platform-card:hover .platform-download {
   opacity: 1;
   transform: translateY(0);
-  color: var(--primary);
-  font-weight: 600;
-  font-size: 0.875rem;
 }
 </style>

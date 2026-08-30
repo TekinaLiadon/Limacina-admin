@@ -2,9 +2,13 @@
   <div>
     <WidgetUsersTable
       :users="users"
+      :page="page"
+      :total="total"
+      :total-pages="totalPages"
       :loading="loading"
       :error="error"
       :acting="acting"
+      @go-to-page="goToPage"
       @change-role="changeRole"
       @change-approved="changeApproved"
       @change-banned="changeBanned"
@@ -24,7 +28,7 @@ definePageMeta({
   layout: 'admin',
 })
 
-const { users, loading, error, acting, fetchUsers, changeRole, changeApproved, changeBanned, deleteUser } = useUsers()
+const { users, page, total, totalPages, loading, error, acting, fetchUsers, goToPage, changeRole, changeApproved, changeBanned, deleteUser } = useUsers()
 
 const showConfirm = ref(false)
 const deleteTarget = ref('')

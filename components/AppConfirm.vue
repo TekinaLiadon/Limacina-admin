@@ -4,8 +4,8 @@
       <div class="confirm-modal">
         <p class="confirm-text">{{ message }}</p>
         <div class="confirm-actions">
-          <button class="btn btn-ghost" @click="cancel">Нет</button>
-          <button class="btn btn-danger" @click="confirm">Да</button>
+          <AppButton variant="ghost" @click="cancel">Нет</AppButton>
+          <AppButton variant="danger" @click="confirm">Да</AppButton>
         </div>
       </div>
     </div>
@@ -63,6 +63,7 @@ const confirm = () => {
   font-size: 0.9375rem;
   line-height: 1.5;
   margin-bottom: 20px;
+  color: var(--text);
 }
 
 .confirm-actions {

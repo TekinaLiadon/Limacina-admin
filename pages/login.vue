@@ -1,16 +1,16 @@
 <template>
-  <div class="login-page">
-    <AuthForm
-      title="Limacina"
-      submit-label="Войти"
-      :error="error"
-      :pending="pending"
-      @submit="handleLogin"
-    />
-  </div>
+  <AuthForm
+    title="Limacina"
+    submit-label="Войти"
+    :error="error"
+    :pending="pending"
+    @submit="handleLogin"
+  />
 </template>
 
 <script setup lang="ts">
+import { toFetchError } from '~/api/errors'
+
 definePageMeta({
   layout: 'default',
 })
@@ -26,26 +26,10 @@ const handleLogin = async (username: string, password: string) => {
 
   try {
     await login(username, password)
-  } catch (e: any) {
-    error.value = e?.message || 'Неверное имя пользователя или пароль'
+  } catch (e) {
+    error.value = toFetchError(e).message || 'Неверное имя пользователя или пароль'
   } finally {
     pending.value = false
   }
 }
 </script>
-
-<style lang="scss" scoped>
-@use '~/assets/css/mixins' as *;
-
-.login-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 24px;
-
-  @include mobile {
-    padding: 16px;
-  }
-}
-</style>

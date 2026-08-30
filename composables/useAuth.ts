@@ -1,14 +1,12 @@
+import { writeCookie } from '~/utils/authCookies'
+import { ApiEndpoint } from '~/api/endpoints'
+import type { AuthResponse } from '~/api/types'
+
 export const useAuth = () => {
   const config = useRuntimeConfig()
-  const token = useCookie('auth_token', { maxAge: 60 * 60 * 24 * 30 })
 
   const login = async (username: string, password: string) => {
-    const res = await $fetch<{
-      tokens: { access_token: string; refresh_token: string }
-      uuid: string
-      username: string
-      role: string
-    }>(`${config.public.apiBase}/auth/login`, {
+    const res = await $fetch<AuthResponse>(`${config.public.apiBase}${ApiEndpoint.AuthLogin}`, {
       method: 'POST',
       body: { username, password },
     })
@@ -17,19 +15,21 @@ export const useAuth = () => {
       throw new Error('Доступ только для администраторов')
     }
 
-    token.value = res.tokens.access_token
+    writeCookie('auth_token', res.tokens.access_token)
+    writeCookie('refresh_token', res.tokens.refresh_token)
     navigateTo('/unapproved')
   }
 
   const register = async (username: string, password: string) => {
-    await $fetch(`${config.public.apiBase}/technical/init-owner`, {
+    await $fetch(`${config.public.apiBase}${ApiEndpoint.InitOwner}`, {
       method: 'POST',
       body: { username, password },
     })
   }
 
   const logout = () => {
-    token.value = null
+    writeCookie('auth_token', null)
+    writeCookie('refresh_token', null)
     navigateTo('/login')
   }
 

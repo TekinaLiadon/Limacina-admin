@@ -15,8 +15,8 @@
 .page-spinner {
   width: 48px;
   height: 48px;
-  border: 3px solid rgba(212, 168, 67, 0.15);
-  border-top-color: #d4a843;
+  border: 2px solid rgba(0, 216, 146, 0.12);
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }

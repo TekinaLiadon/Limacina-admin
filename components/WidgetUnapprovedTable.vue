@@ -1,103 +1,89 @@
 <template>
   <div>
     <div class="toolbar">
-      <button class="btn btn-ghost btn-sm" @click="$emit('refresh')">Обновить</button>
+      <AppButton variant="ghost" size="sm" @click="$emit('refresh')">Обновить</AppButton>
     </div>
 
-    <AppSpinner v-if="loading" />
-    <AppAlert v-else-if="error" :message="error" type="error" />
+    <AppDataState :loading="loading" :error="error" :empty="!users.length" empty-text="Нет неодобренных пользователей">
+      <AppResponsiveList :items="users" :columns="columns" :item-key="userKey">
+        <template #row="{ item }">
+          <tr>
+            <td>{{ item.username }}</td>
+            <td>{{ formatDate(item.createdAt) }}</td>
+            <td>
+              <AppButton
+                variant="success"
+                size="sm"
+                :loading="approving === item.username"
+                @click="$emit('approve', item.username)"
+              >
+                Одобрить
+              </AppButton>
+            </td>
+          </tr>
+        </template>
 
-    <div v-else-if="!users.length" class="card empty-state">
-      <p>Нет неодобренных пользователей</p>
-    </div>
-
-    <template v-else>
-      <div class="card table-wrap desktop-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Имя пользователя</th>
-              <th>Дата регистрации</th>
-              <th>Действие</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="user in users" :key="user.username">
-              <td>{{ user.username }}</td>
-              <td>{{ formatDate(user.createdAt) }}</td>
-              <td>
-                <button
-                  class="btn btn-success btn-sm"
-                  :disabled="approving === user.username"
-                  @click="$emit('approve', user.username)"
-                >
-                  <span v-if="approving === user.username" class="spinner"></span>
-                  <span v-else>Одобрить</span>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="mobile-cards">
-        <div v-for="user in users" :key="user.username" class="user-card">
-          <div class="user-card-info">
-            <span class="user-card-name">{{ user.username }}</span>
-            <span class="user-card-date">{{ formatDate(user.createdAt) }}</span>
+        <template #card="{ item }">
+          <div class="user-card">
+            <div class="user-card-info">
+              <span class="user-card-name">{{ item.username }}</span>
+              <span class="user-card-date">{{ formatDate(item.createdAt) }}</span>
+            </div>
+            <AppButton
+              variant="success"
+              size="sm"
+              class="user-card-btn"
+              :loading="approving === item.username"
+              @click="$emit('approve', item.username)"
+            >
+              Одобрить
+            </AppButton>
           </div>
-          <button
-            class="btn btn-success btn-sm user-card-btn"
-            :disabled="approving === user.username"
-            @click="$emit('approve', user.username)"
-          >
-            <span v-if="approving === user.username" class="spinner"></span>
-            <span v-else>Одобрить</span>
-          </button>
-        </div>
-      </div>
-    </template>
+        </template>
+      </AppResponsiveList>
+
+      <AppPagination
+        :page="page"
+        :per-page="UNAPPROVED_PER_PAGE"
+        :total="total"
+        :total-pages="totalPages"
+        @go-to-page="$emit('goToPage', $event)"
+      />
+    </AppDataState>
   </div>
 </template>
 
 <script setup lang="ts">
+import type { UnapprovedUser } from '~/api/types'
+import { formatDate } from '~/utils/format'
+import { UNAPPROVED_PER_PAGE } from '~/composables/useUnapprovedUsers'
+
 defineProps<{
-  users: Array<{ username: string; createdAt: string }>
+  users: UnapprovedUser[]
+  page: number
+  total: number
+  totalPages: number
   loading: boolean
   error: string
   approving: string
-  formatDate: (date: string) => string
 }>()
 
 defineEmits<{
+  goToPage: [page: number]
   refresh: []
   approve: [username: string]
 }>()
+
+const columns = ['Имя пользователя', 'Дата регистрации', 'Действие']
+
+const userKey = (user: UnapprovedUser) => user.username
 </script>
 
 <style lang="scss" scoped>
-@use '~/assets/css/mixins' as *;
-
 .toolbar {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 16px;
-}
-
-.desktop-table {
-  @include mobile {
-    display: none;
-  }
-}
-
-.mobile-cards {
-  display: none;
-
-  @include mobile {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
 }
 
 .user-card {
@@ -114,16 +100,17 @@ defineEmits<{
 .user-card-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .user-card-name {
-  font-weight: 600;
   font-size: 0.875rem;
+  color: var(--text-bright);
 }
 
 .user-card-date {
-  font-size: 0.8125rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
   color: var(--text-muted);
 }
 

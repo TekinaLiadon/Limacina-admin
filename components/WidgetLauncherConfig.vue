@@ -31,21 +31,20 @@
       </div>
       <AppAlert v-if="saveSuccess" :message="saveSuccess" type="success" />
       <AppAlert v-if="saveError" :message="saveError" type="error" />
-      <button type="button" class="btn btn-primary" :disabled="saving" @click="$emit('save')">
-        <span v-if="saving" class="spinner"></span>
-        <span v-else>{{ isNew ? 'Создать конфиг' : 'Сохранить' }}</span>
-      </button>
+      <AppButton variant="primary" :loading="saving" @click="$emit('save')">
+        {{ isNew ? 'Создать конфиг' : 'Сохранить' }}
+      </AppButton>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { LauncherConfig } from '~/composables/useLauncherConfig'
+import type { LauncherConfig, LauncherConfigForm } from '~/composables/useLauncherConfig'
 
 defineProps<{
-  config: any
+  config: LauncherConfig | null
   isNew: boolean
-  form: LauncherConfig
+  form: LauncherConfigForm
   saving: boolean
   saveError: string
   saveSuccess: string
@@ -55,7 +54,7 @@ defineEmits<{
   save: []
 }>()
 
-type FieldKey = keyof Omit<LauncherConfig, 'jvmArgs'>
+type FieldKey = keyof Omit<LauncherConfigForm, 'jvmArgs'>
 
 const fields: { key: FieldKey; label: string; placeholder?: string; type?: 'select' }[] = [
   { key: 'projectName', label: 'Проект' },
@@ -71,11 +70,6 @@ const fields: { key: FieldKey; label: string; placeholder?: string; type?: 'sele
 <style lang="scss" scoped>
 @use '~/assets/css/mixins' as *;
 
-.widget-title {
-  font-size: 1rem;
-  margin-bottom: 16px;
-}
-
 .config-edit-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -89,9 +83,5 @@ const fields: { key: FieldKey; label: string; placeholder?: string; type?: 'sele
 
 .jvm-args {
   margin-bottom: 16px;
-}
-
-.padded {
-  padding: 24px;
 }
 </style>

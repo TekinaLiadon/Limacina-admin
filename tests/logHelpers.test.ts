@@ -2,8 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   levelName, levelBadge, statusBadge, rowClass,
   formatTime, formatDateTime, formatJson,
-  formatParams, formatHeaders, parseLines,
-  capitalize, downloadUrl,
+  formatHeaders, formatResHeaders, parseLines,
   type LogEntry,
 } from '../utils/logHelpers'
 
@@ -93,7 +92,7 @@ describe('formatTime', () => {
 
   it('returns dash for falsy values', () => {
     expect(formatTime(0)).toBe('—')
-    expect(formatTime(undefined as any)).toBe('—')
+    expect(formatTime(undefined as unknown as number)).toBe('—')
   })
 })
 
@@ -125,53 +124,6 @@ describe('formatJson', () => {
 
   it('handles numbers', () => {
     expect(formatJson(42)).toBe('42')
-  })
-})
-
-describe('formatParams', () => {
-  it('returns empty string when no req', () => {
-    expect(formatParams({ level: 30, time: 0 })).toBe('')
-  })
-
-  it('formats query params', () => {
-    const entry: LogEntry = {
-      level: 30,
-      time: 0,
-      req: { query: { page: 1, limit: 10 } },
-    }
-    const result = formatParams(entry)
-    expect(result).toContain('"page":1')
-    expect(result).toContain('"limit":10')
-  })
-
-  it('formats body as JSON', () => {
-    const entry: LogEntry = {
-      level: 30,
-      time: 0,
-      req: { body: { username: 'admin' } },
-    }
-    const result = formatParams(entry)
-    expect(result).toContain('"username":"admin"')
-  })
-
-  it('formats body as string', () => {
-    const entry: LogEntry = {
-      level: 30,
-      time: 0,
-      req: { body: 'raw data' },
-    }
-    expect(formatParams(entry)).toBe('raw data')
-  })
-
-  it('combines query and body', () => {
-    const entry: LogEntry = {
-      level: 30,
-      time: 0,
-      req: { query: { id: 1 }, body: { name: 'test' } },
-    }
-    const result = formatParams(entry)
-    expect(result).toContain('"id":1')
-    expect(result).toContain('"name":"test"')
   })
 })
 
@@ -208,6 +160,52 @@ describe('formatHeaders', () => {
     expect(result).toHaveProperty('content-type')
     expect(result).toHaveProperty('authorization')
   })
+
+  it('masks authorization and cookie values', () => {
+    const entry: LogEntry = {
+      level: 30,
+      time: 0,
+      req: {
+        headers: {
+          authorization: 'Bearer secret-token',
+          cookie: 'session=secret',
+          'content-type': 'application/json',
+        },
+      },
+    }
+    const result = JSON.parse(formatHeaders(entry))
+    expect(result.authorization).toBe('***')
+    expect(result.cookie).toBe('***')
+    expect(result['content-type']).toBe('application/json')
+  })
+})
+
+describe('formatResHeaders', () => {
+  it('returns empty string when no res', () => {
+    expect(formatResHeaders({ level: 30, time: 0 })).toBe('')
+  })
+
+  it('returns empty string for empty headers', () => {
+    const entry: LogEntry = { level: 30, time: 0, res: { headers: {} } }
+    expect(formatResHeaders(entry)).toBe('')
+  })
+
+  it('masks set-cookie values', () => {
+    const entry: LogEntry = {
+      level: 30,
+      time: 0,
+      res: {
+        statusCode: 200,
+        headers: {
+          'set-cookie': 'sid=secret-session-id',
+          'content-type': 'application/json',
+        },
+      },
+    }
+    const result = JSON.parse(formatResHeaders(entry))
+    expect(result['set-cookie']).toBe('***')
+    expect(result['content-type']).toBe('application/json')
+  })
 })
 
 describe('parseLines', () => {
@@ -235,27 +233,5 @@ describe('parseLines', () => {
 
   it('returns empty array for empty input', () => {
     expect(parseLines([])).toEqual([])
-  })
-})
-
-describe('capitalize', () => {
-  it('capitalizes first letter', () => {
-    expect(capitalize('linux')).toBe('Linux')
-    expect(capitalize('windows')).toBe('Windows')
-  })
-
-  it('does not change already capitalized', () => {
-    expect(capitalize('Linux')).toBe('Linux')
-  })
-
-  it('returns empty string for empty input', () => {
-    expect(capitalize('')).toBe('')
-  })
-})
-
-describe('downloadUrl', () => {
-  it('builds correct URL', () => {
-    expect(downloadUrl('/api', 'linux', 'x86_64')).toBe('/api/launcher/linux/x86_64/download')
-    expect(downloadUrl('/api', 'windows', 'x86_64')).toBe('/api/launcher/windows/x86_64/download')
   })
 })

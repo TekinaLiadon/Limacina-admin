@@ -27,7 +27,7 @@ export interface LogEntry {
   [key: string]: unknown
 }
 
-export const LEVEL_NAMES: Record<number, string> = {
+const LEVEL_NAMES: Record<number, string> = {
   10: 'TRACE',
   20: 'DEBUG',
   30: 'INFO',
@@ -83,30 +83,28 @@ export const formatJson = (obj: unknown): string => {
   }
 }
 
-export const formatParams = (entry: LogEntry): string => {
-  const parts: string[] = []
-  const q = entry.req?.query
-  if (q && Object.keys(q).length > 0) {
-    parts.push(JSON.stringify(q))
+const HIDDEN_HEADERS = new Set(['host', 'connection', 'accept-encoding', 'cache-control'])
+const MASKED_HEADERS = new Set(['authorization', 'proxy-authorization', 'cookie', 'set-cookie'])
+
+const maskHeaders = (h: Record<string, string>): Record<string, string> => {
+  const filtered: Record<string, string> = {}
+  for (const k of Object.keys(h)) {
+    if (HIDDEN_HEADERS.has(k)) continue
+    filtered[k] = MASKED_HEADERS.has(k) ? '***' : h[k]
   }
-  const b = entry.req?.body
-  if (b !== undefined && b !== null) {
-    parts.push(typeof b === 'string' ? b : JSON.stringify(b))
-  }
-  return parts.join(' ')
+  return filtered
 }
 
 export const formatHeaders = (entry: LogEntry): string => {
   const h = entry.req?.headers
-  if (!h) return ''
-  const keys = Object.keys(h)
-  if (keys.length === 0) return ''
-  const filtered: Record<string, string> = {}
-  for (const k of keys) {
-    if (k === 'host' || k === 'connection' || k === 'accept-encoding' || k === 'cache-control') continue
-    filtered[k] = h[k]
-  }
-  return JSON.stringify(filtered)
+  if (!h || Object.keys(h).length === 0) return ''
+  return JSON.stringify(maskHeaders(h))
+}
+
+export const formatResHeaders = (entry: LogEntry): string => {
+  const h = entry.res?.headers
+  if (!h || Object.keys(h).length === 0) return ''
+  return JSON.stringify(maskHeaders(h))
 }
 
 export const parseLines = (lines: string[]): LogEntry[] => {
@@ -120,7 +118,3 @@ export const parseLines = (lines: string[]): LogEntry[] => {
   }
   return parsed
 }
-
-export const capitalize = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : s
-
-export const downloadUrl = (apiBase: string, os: string, arch: string) => `${apiBase}/launcher/${os}/${arch}/download`

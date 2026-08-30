@@ -1,29 +1,24 @@
 <template>
   <header class="header">
     <div class="header-left">
-      <button class="btn btn-ghost btn-sm hamburger" @click="$emit('toggleSidebar')">
+      <AppButton variant="ghost" size="sm" class="hamburger" @click="$emit('toggleSidebar')">
         ☰
-      </button>
+      </AppButton>
       <h1 class="header-title">{{ pageTitle }}</h1>
     </div>
-    <button class="btn btn-ghost" @click="logout">Выйти</button>
+    <AppButton variant="ghost" @click="logout">Выйти</AppButton>
   </header>
 </template>
 
 <script setup lang="ts">
 const route = useRoute()
-const token = useCookie('auth_token')
+const { logout } = useAuth()
 
 defineEmits<{
   toggleSidebar: []
 }>()
 
 const pageTitle = computed(() => navTitles[route.path] || 'Admin')
-
-const logout = async () => {
-  token.value = null
-  navigateTo('/login')
-}
 </script>
 
 <style lang="scss" scoped>
@@ -59,7 +54,8 @@ const logout = async () => {
 
 .header-title {
   font-size: 1.125rem;
-  font-weight: 600;
+  font-weight: 400;
+  color: var(--text-bright);
 
   @include mobile {
     font-size: 1rem;

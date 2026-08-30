@@ -36,7 +36,7 @@
 
         <div class="detail-section" v-if="entry.req?.headers && Object.keys(entry.req.headers).length">
           <h4>Заголовки</h4>
-          <pre class="detail-code highlight-code">{{ formatJson(entry.req.headers) }}</pre>
+          <pre class="detail-code highlight-code">{{ formatHeaders(entry) }}</pre>
         </div>
 
         <div class="detail-section">
@@ -55,7 +55,7 @@
 
         <div class="detail-section" v-if="entry.res?.headers && Object.keys(entry.res.headers).length">
           <h4>Заголовки ответа</h4>
-          <pre class="detail-code highlight-code">{{ formatJson(entry.res.headers) }}</pre>
+          <pre class="detail-code highlight-code">{{ formatResHeaders(entry) }}</pre>
         </div>
 
         <div class="detail-section" v-if="entry.err">
@@ -112,7 +112,7 @@
 import {
   type LogEntry,
   levelName, levelBadge, statusBadge,
-  formatDateTime, formatJson,
+  formatDateTime, formatJson, formatHeaders, formatResHeaders,
 } from '~/utils/logHelpers'
 
 defineProps<{
@@ -127,7 +127,7 @@ defineProps<{
 }
 
 .detail-panel {
-  background: var(--bg-secondary);
+  background: var(--bg-elevated);
   border-top: 1px solid var(--border);
   padding: 16px 20px;
 }
@@ -140,13 +140,13 @@ defineProps<{
   }
 
   h4 {
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    font-weight: 400;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.064em;
     color: var(--text-muted);
     margin: 0 0 8px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 }
 
@@ -163,18 +163,21 @@ defineProps<{
 }
 
 .detail-label {
-  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.058em;
+  text-transform: uppercase;
   color: var(--text-muted);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .detail-value {
-  font-size: 0.8125rem;
-  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text);
 }
 
 .method-value {
-  font-weight: 700;
+  text-transform: uppercase;
   color: var(--primary);
 }
 
@@ -188,15 +191,15 @@ defineProps<{
   border-radius: var(--radius-sm);
   padding: 12px;
   margin: 0;
-  font-size: 0.75rem;
-  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace;
+  font-size: 0.6875rem;
+  font-family: var(--font-mono);
   overflow-x: auto;
   white-space: pre-wrap;
   word-break: break-all;
 
   &.error-code {
-    border-color: rgba(239, 68, 68, 0.3);
-    background: rgba(239, 68, 68, 0.05);
+    border-color: rgba(255, 98, 133, 0.35);
+    background: rgba(255, 98, 133, 0.04);
     color: var(--danger);
   }
 

@@ -1,4 +1,6 @@
 import { type LogEntry, parseLines } from '~/utils/logHelpers'
+import { ApiEndpoint } from '~/api/endpoints'
+import type { LogPage } from '~/api/types'
 
 export const useLogs = () => {
   const { get } = useApi()
@@ -34,13 +36,11 @@ export const useLogs = () => {
     error.value = ''
 
     try {
-      const { data, error: err } = await get<{
-        date: string
-        offset: number
-        limit: number
-        total: number
-        lines: string[]
-      }>(`/admin/logs?date=${selectedDate.value}&offset=${offset.value}&limit=${limit.value}`)
+      const { data, error: err } = await get<LogPage>(ApiEndpoint.AdminLogs, {
+        date: selectedDate.value,
+        offset: offset.value,
+        limit: limit.value,
+      })
 
       if (err.value) {
         error.value = err.value
@@ -60,7 +60,7 @@ export const useLogs = () => {
     error.value = ''
 
     try {
-      const { data, error: err } = await get<string[]>('/admin/logs/dates')
+      const { data, error: err } = await get<string[]>(ApiEndpoint.AdminLogDates)
       if (err.value) {
         error.value = err.value
         return

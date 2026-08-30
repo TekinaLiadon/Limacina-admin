@@ -1,14 +1,7 @@
 <template>
   <div>
-    <AppSpinner v-if="isLoading" />
-    <AppAlert v-else-if="error" :message="error" type="error" />
-
-    <template v-else>
-      <WidgetVersionInfo
-        :version="version"
-        :get-download-url="getDownloadUrl"
-        :capitalize="capitalize"
-      />
+    <AppDataState :loading="isLoading" :error="pageError">
+      <WidgetVersionInfo :version="version" />
 
       <WidgetLauncherUpload
         :form="uploadForm"
@@ -27,7 +20,7 @@
         :save-success="saveSuccess"
         @save="saveConfig"
       />
-    </template>
+    </AppDataState>
   </div>
 </template>
 
@@ -37,12 +30,12 @@ definePageMeta({
 })
 
 const {
-  version, loading: versionLoading, error, fetchVersion, getDownloadUrl, capitalize,
+  version, loading: versionLoading, error: versionError, fetchVersion,
 } = useLauncherVersion()
 
 const {
-  config, isNew, form: configForm, loading: configLoading, saving, saveError, saveSuccess,
-  fetchConfig, saveConfig,
+  config, isNew, form: configForm, loading: configLoading, error: configError,
+  saving, saveError, saveSuccess, fetchConfig, saveConfig,
 } = useLauncherConfig()
 
 const {
@@ -51,6 +44,7 @@ const {
 } = useLauncherUpload()
 
 const isLoading = computed(() => versionLoading.value || configLoading.value)
+const pageError = computed(() => versionError.value || configError.value)
 
 const handleUpload = () => {
   uploadLauncher((v) => { version.value = v })

@@ -1,11 +1,10 @@
-import { capitalize, downloadUrl } from '~/utils/logHelpers'
+import { ApiEndpoint } from '~/api/endpoints'
+import type { LauncherVersion } from '~/api/types'
 
 export const useLauncherVersion = () => {
   const { get } = useApi()
-  const config = useRuntimeConfig()
-  const apiBase = config.public.apiBase
 
-  const version = ref<any>(null)
+  const version = ref<LauncherVersion | null>(null)
   const loading = ref(true)
   const error = ref('')
 
@@ -14,7 +13,7 @@ export const useLauncherVersion = () => {
     error.value = ''
 
     try {
-      const res = await get<any>('/launcher/version')
+      const res = await get<LauncherVersion>(ApiEndpoint.LauncherVersion)
       if (res.error.value) {
         error.value = res.error.value
       } else {
@@ -25,7 +24,5 @@ export const useLauncherVersion = () => {
     }
   }
 
-  const getDownloadUrl = (os: string, arch: string) => downloadUrl(apiBase, os, arch)
-
-  return { version, loading, error, fetchVersion, getDownloadUrl, capitalize }
+  return { version, loading, error, fetchVersion }
 }

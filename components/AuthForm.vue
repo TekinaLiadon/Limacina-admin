@@ -34,10 +34,9 @@
         />
       </div>
 
-      <button type="submit" class="btn btn-primary login-btn" :disabled="pending">
-        <span v-if="pending" class="spinner"></span>
-        <span v-else>{{ submitLabel }}</span>
-      </button>
+      <AppButton type="submit" variant="primary" class="login-btn" :loading="pending">
+        {{ submitLabel }}
+      </AppButton>
     </form>
   </div>
 </template>
@@ -87,14 +86,13 @@ const onSubmit = () => {
 }
 
 .brand-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm);
+  width: 36px;
+  height: 36px;
 }
 
 h1 {
   font-size: 1.25rem;
-  font-weight: 600;
+  color: var(--text-bright);
 }
 
 form {
@@ -105,8 +103,7 @@ form {
 
 .login-btn {
   width: 100%;
-  justify-content: center;
-  padding: 12px;
+  padding: 10px 12px;
   margin-top: 8px;
 }
 </style>

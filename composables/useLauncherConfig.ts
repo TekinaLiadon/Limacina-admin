@@ -1,4 +1,9 @@
-export interface LauncherConfig {
+import { ApiEndpoint } from '~/api/endpoints'
+import type { LauncherConfig } from '~/api/types'
+
+export type { LauncherConfig } from '~/api/types'
+
+export interface LauncherConfigForm {
   projectName: string
   mcVersion: string
   modLoader: string
@@ -9,7 +14,7 @@ export interface LauncherConfig {
   jvmArgs: string
 }
 
-const defaultConfig = (): LauncherConfig => ({
+const defaultConfig = (): LauncherConfigForm => ({
   projectName: '',
   mcVersion: '',
   modLoader: '',
@@ -23,11 +28,11 @@ const defaultConfig = (): LauncherConfig => ({
 export const useLauncherConfig = () => {
   const { get, post, patch } = useApi()
 
-  const config = ref<any>(null)
+  const config = ref<LauncherConfig | null>(null)
   const isNew = ref(false)
   const loading = ref(true)
   const error = ref('')
-  const form = reactive<LauncherConfig>(defaultConfig())
+  const form = reactive<LauncherConfigForm>(defaultConfig())
 
   const saving = ref(false)
   const saveError = ref('')
@@ -38,9 +43,11 @@ export const useLauncherConfig = () => {
     error.value = ''
 
     try {
-      const res = await get<any>('/launcher/config')
+      const res = await get<LauncherConfig>(ApiEndpoint.LauncherConfig)
 
-      if (res.data.value) {
+      if (res.error.value) {
+        error.value = res.error.value
+      } else if (res.data.value) {
         config.value = res.data.value
         isNew.value = false
         Object.assign(form, {
@@ -68,29 +75,29 @@ export const useLauncherConfig = () => {
     saveError.value = ''
     saveSuccess.value = ''
 
-    try {
-      const body = {
-        projectName: form.projectName,
-        mcVersion: form.mcVersion,
-        modLoader: form.modLoader,
-        loaderVersion: form.loaderVersion,
-        minMemory: form.minMemory,
-        maxMemory: form.maxMemory,
-        online: form.online,
-        jvmArgs: form.jvmArgs.split(/\s+/).filter(Boolean),
-      }
+    const body = {
+      projectName: form.projectName,
+      mcVersion: form.mcVersion,
+      modLoader: form.modLoader,
+      loaderVersion: form.loaderVersion,
+      minMemory: form.minMemory,
+      maxMemory: form.maxMemory,
+      online: form.online,
+      jvmArgs: form.jvmArgs.split(/\s+/).filter(Boolean),
+    }
 
-      if (isNew.value) {
-        await post('/launcher/config', body)
-        saveSuccess.value = 'Конфиг создан'
-        isNew.value = false
-        config.value = body
+    try {
+      const res = isNew.value
+        ? await post<LauncherConfig>(ApiEndpoint.LauncherConfig, body)
+        : await patch<LauncherConfig>(ApiEndpoint.AdminConfig, body)
+
+      if (res.error.value) {
+        saveError.value = res.error.value
       } else {
-        await patch('/admin/config', body)
-        saveSuccess.value = 'Конфиг обновлён'
+        saveSuccess.value = isNew.value ? 'Конфиг создан' : 'Конфиг обновлён'
+        isNew.value = false
+        if (res.data.value) config.value = res.data.value
       }
-    } catch (e: any) {
-      saveError.value = e?.data?.errorMessage || e?.message || 'Ошибка сохранения'
     } finally {
       saving.value = false
     }

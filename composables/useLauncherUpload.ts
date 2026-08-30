@@ -1,3 +1,6 @@
+import { ApiEndpoint } from '~/api/endpoints'
+import type { LauncherVersion } from '~/api/types'
+
 export interface LauncherUploadForm {
   version: string
   linuxX86: File | null
@@ -6,9 +9,7 @@ export interface LauncherUploadForm {
 }
 
 export const useLauncherUpload = () => {
-  const { get } = useApi()
-  const config = useRuntimeConfig()
-  const apiBase = config.public.apiBase
+  const { get, patch } = useApi()
 
   const form = reactive<LauncherUploadForm>({
     version: '',
@@ -21,38 +22,33 @@ export const useLauncherUpload = () => {
   const uploadError = ref('')
   const uploadSuccess = ref('')
 
-  const uploadLauncher = async (onVersionUpdate: (v: any) => void) => {
+  const uploadLauncher = async (onVersionUpdate: (v: LauncherVersion) => void) => {
     uploading.value = true
     uploadError.value = ''
     uploadSuccess.value = ''
 
-    try {
-      const formData = new FormData()
-      formData.append('version', form.version)
+    const formData = new FormData()
+    formData.append('version', form.version)
 
-      if (form.linuxX86) formData.append('linux_x86_64', form.linuxX86)
-      if (form.linuxArm) formData.append('linux_aarch64', form.linuxArm)
-      if (form.windowsX86) formData.append('windows_x86_64', form.windowsX86)
+    if (form.linuxX86) formData.append('linux_x86_64', form.linuxX86)
+    if (form.linuxArm) formData.append('linux_aarch64', form.linuxArm)
+    if (form.windowsX86) formData.append('windows_x86_64', form.windowsX86)
 
-      const token = useCookie('auth_token')
-      await $fetch(`${apiBase}/admin/launcher`, {
-        method: 'PATCH',
-        headers: token.value ? { Authorization: `Bearer ${token.value}` } : {},
-        body: formData,
-      })
+    const res = await patch(ApiEndpoint.AdminLauncher, formData)
 
+    if (res.error.value) {
+      uploadError.value = res.error.value
+    } else {
       uploadSuccess.value = 'Лаунчер обновлён'
       form.linuxX86 = null
       form.linuxArm = null
       form.windowsX86 = null
 
-      const versionRes = await get<any>('/launcher/version')
+      const versionRes = await get<LauncherVersion>(ApiEndpoint.LauncherVersion)
       if (versionRes.data.value) onVersionUpdate(versionRes.data.value)
-    } catch (e: any) {
-      uploadError.value = e?.data?.errorMessage || e?.message || 'Ошибка загрузки'
-    } finally {
-      uploading.value = false
     }
+
+    uploading.value = false
   }
 
   return { form, uploading, uploadError, uploadSuccess, uploadLauncher }
