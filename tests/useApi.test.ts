@@ -112,6 +112,72 @@ describe('useApi — errors', () => {
   })
 })
 
+describe('useApi — session invalidation', () => {
+  it('sends invalidate request with refresh token', async () => {
+    writeCookie('refresh_token', 'r-1')
+    fetchMock.mockImplementation(() => ok({ success: true }))
+
+    useApi().invalidateSession()
+    await Promise.resolve()
+
+    expect(fetchMock).toHaveBeenCalledWith(`${API}/auth/invalidate`, {
+      method: 'POST',
+      body: { refresh_token: 'r-1' },
+    })
+  })
+
+  it('does nothing without refresh token cookie', async () => {
+    fetchMock.mockImplementation(() => ok({ success: true }))
+
+    useApi().invalidateSession()
+    await Promise.resolve()
+
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('swallows invalidate errors', async () => {
+    writeCookie('refresh_token', 'r-1')
+    fetchMock.mockImplementation(() => fail(400))
+
+    useApi().invalidateSession()
+    await new Promise((resolve) => setTimeout(resolve, 0))
+  })
+
+  it('invalidates session when refresh fails', async () => {
+    writeCookie('auth_token', 'old-access')
+    writeCookie('refresh_token', 'dead-refresh')
+
+    fetchMock.mockImplementation((url: string) =>
+      url === `${API}/auth/invalidate` ? ok({ success: true }) : fail(401),
+    )
+
+    await useApi().get('/admin/users')
+
+    expect(fetchMock).toHaveBeenCalledWith(`${API}/auth/invalidate`, {
+      method: 'POST',
+      body: { refresh_token: 'dead-refresh' },
+    })
+  })
+
+  it('invalidates new session when retried request fails with 401 again', async () => {
+    writeCookie('auth_token', 'old-access')
+    writeCookie('refresh_token', 'old-refresh')
+
+    fetchMock.mockImplementation((url: string) => {
+      if (url === `${API}/auth/refresh`) return ok(tokens('new-access', 'new-refresh'))
+      if (url === `${API}/auth/invalidate`) return ok({ success: true })
+      return fail(401)
+    })
+
+    await useApi().get('/admin/users')
+
+    expect(fetchMock).toHaveBeenCalledWith(`${API}/auth/invalidate`, {
+      method: 'POST',
+      body: { refresh_token: 'new-refresh' },
+    })
+  })
+})
+
 describe('useApi — token refresh on 401', () => {
   it('refreshes tokens and retries the request', async () => {
     writeCookie('auth_token', 'old-access')

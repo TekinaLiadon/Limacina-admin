@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   levelName, levelBadge, statusBadge, rowClass,
   formatTime, formatDateTime, formatJson,
-  formatHeaders, formatResHeaders, parseLines,
+  reqHeaderPairs, resHeaderPairs, parseLines,
   type LogEntry,
 } from '../utils/logHelpers'
 
@@ -127,14 +127,14 @@ describe('formatJson', () => {
   })
 })
 
-describe('formatHeaders', () => {
-  it('returns empty string when no headers', () => {
-    expect(formatHeaders({ level: 30, time: 0 })).toBe('')
+describe('reqHeaderPairs', () => {
+  it('returns empty array when no headers', () => {
+    expect(reqHeaderPairs({ level: 30, time: 0 })).toEqual([])
   })
 
-  it('returns empty string for empty headers', () => {
+  it('returns empty array for empty headers', () => {
     const entry: LogEntry = { level: 30, time: 0, req: { headers: {} } }
-    expect(formatHeaders(entry)).toBe('')
+    expect(reqHeaderPairs(entry)).toEqual([])
   })
 
   it('filters out host, connection, accept-encoding, cache-control', () => {
@@ -152,13 +152,13 @@ describe('formatHeaders', () => {
         },
       },
     }
-    const result = JSON.parse(formatHeaders(entry))
-    expect(result).not.toHaveProperty('host')
-    expect(result).not.toHaveProperty('connection')
-    expect(result).not.toHaveProperty('accept-encoding')
-    expect(result).not.toHaveProperty('cache-control')
-    expect(result).toHaveProperty('content-type')
-    expect(result).toHaveProperty('authorization')
+    const names = reqHeaderPairs(entry).map((h) => h.name)
+    expect(names).not.toContain('host')
+    expect(names).not.toContain('connection')
+    expect(names).not.toContain('accept-encoding')
+    expect(names).not.toContain('cache-control')
+    expect(names).toContain('content-type')
+    expect(names).toContain('authorization')
   })
 
   it('masks authorization and cookie values', () => {
@@ -173,21 +173,36 @@ describe('formatHeaders', () => {
         },
       },
     }
-    const result = JSON.parse(formatHeaders(entry))
-    expect(result.authorization).toBe('***')
-    expect(result.cookie).toBe('***')
-    expect(result['content-type']).toBe('application/json')
+    const pairs = reqHeaderPairs(entry)
+    expect(pairs.find((h) => h.name === 'authorization')?.value).toBe('***')
+    expect(pairs.find((h) => h.name === 'cookie')?.value).toBe('***')
+    expect(pairs.find((h) => h.name === 'content-type')?.value).toBe('application/json')
+  })
+
+  it('sorts headers by name', () => {
+    const entry: LogEntry = {
+      level: 30,
+      time: 0,
+      req: {
+        headers: {
+          'user-agent': 'curl',
+          'content-type': 'application/json',
+          accept: '*/*',
+        },
+      },
+    }
+    expect(reqHeaderPairs(entry).map((h) => h.name)).toEqual(['accept', 'content-type', 'user-agent'])
   })
 })
 
-describe('formatResHeaders', () => {
-  it('returns empty string when no res', () => {
-    expect(formatResHeaders({ level: 30, time: 0 })).toBe('')
+describe('resHeaderPairs', () => {
+  it('returns empty array when no res', () => {
+    expect(resHeaderPairs({ level: 30, time: 0 })).toEqual([])
   })
 
-  it('returns empty string for empty headers', () => {
+  it('returns empty array for empty headers', () => {
     const entry: LogEntry = { level: 30, time: 0, res: { headers: {} } }
-    expect(formatResHeaders(entry)).toBe('')
+    expect(resHeaderPairs(entry)).toEqual([])
   })
 
   it('masks set-cookie values', () => {
@@ -202,9 +217,9 @@ describe('formatResHeaders', () => {
         },
       },
     }
-    const result = JSON.parse(formatResHeaders(entry))
-    expect(result['set-cookie']).toBe('***')
-    expect(result['content-type']).toBe('application/json')
+    const pairs = resHeaderPairs(entry)
+    expect(pairs.find((h) => h.name === 'set-cookie')?.value).toBe('***')
+    expect(pairs.find((h) => h.name === 'content-type')?.value).toBe('application/json')
   })
 })
 

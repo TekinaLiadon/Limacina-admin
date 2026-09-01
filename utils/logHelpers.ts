@@ -95,16 +95,24 @@ const maskHeaders = (h: Record<string, string>): Record<string, string> => {
   return filtered
 }
 
-export const formatHeaders = (entry: LogEntry): string => {
-  const h = entry.req?.headers
-  if (!h || Object.keys(h).length === 0) return ''
-  return JSON.stringify(maskHeaders(h))
+export interface HeaderPair {
+  name: string
+  value: string
 }
 
-export const formatResHeaders = (entry: LogEntry): string => {
-  const h = entry.res?.headers
-  if (!h || Object.keys(h).length === 0) return ''
-  return JSON.stringify(maskHeaders(h))
+const headerPairs = (headers: Record<string, string>): HeaderPair[] =>
+  Object.entries(maskHeaders(headers))
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => a.name.localeCompare(b.name))
+
+export const reqHeaderPairs = (entry: LogEntry): HeaderPair[] => {
+  const headers = entry.req?.headers
+  return headers ? headerPairs(headers) : []
+}
+
+export const resHeaderPairs = (entry: LogEntry): HeaderPair[] => {
+  const headers = entry.res?.headers
+  return headers ? headerPairs(headers) : []
 }
 
 export const parseLines = (lines: string[]): LogEntry[] => {

@@ -34,9 +34,16 @@
           <pre class="detail-code highlight-code">{{ formatJson(entry.req.body) }}</pre>
         </div>
 
-        <div class="detail-section" v-if="entry.req?.headers && Object.keys(entry.req.headers).length">
+        <div class="detail-section" v-if="reqHeaderPairs(entry).length">
           <h4>Заголовки</h4>
-          <pre class="detail-code highlight-code">{{ formatHeaders(entry) }}</pre>
+          <table class="header-table">
+            <tbody>
+              <tr v-for="header in reqHeaderPairs(entry)" :key="header.name">
+                <td class="header-name">{{ header.name }}</td>
+                <td class="header-value">{{ header.value }}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         <div class="detail-section">
@@ -53,9 +60,16 @@
           </div>
         </div>
 
-        <div class="detail-section" v-if="entry.res?.headers && Object.keys(entry.res.headers).length">
+        <div class="detail-section" v-if="resHeaderPairs(entry).length">
           <h4>Заголовки ответа</h4>
-          <pre class="detail-code highlight-code">{{ formatResHeaders(entry) }}</pre>
+          <table class="header-table">
+            <tbody>
+              <tr v-for="header in resHeaderPairs(entry)" :key="header.name">
+                <td class="header-name">{{ header.name }}</td>
+                <td class="header-value">{{ header.value }}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         <div class="detail-section" v-if="entry.err">
@@ -112,7 +126,7 @@
 import {
   type LogEntry,
   levelName, levelBadge, statusBadge,
-  formatDateTime, formatJson, formatHeaders, formatResHeaders,
+  formatDateTime, formatJson, reqHeaderPairs, resHeaderPairs,
 } from '~/utils/logHelpers'
 
 defineProps<{
@@ -121,6 +135,8 @@ defineProps<{
 </script>
 
 <style lang="scss" scoped>
+@use '~/assets/css/mixins' as *;
+
 .detail-row td {
   padding: 0;
   border-bottom: 1px solid var(--border);
@@ -205,6 +221,52 @@ defineProps<{
 
   &.highlight-code {
     color: var(--text);
+  }
+}
+
+.header-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+
+  td {
+    padding: 5px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    word-break: break-all;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.header-name {
+  width: 200px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.header-value {
+  color: var(--text-bright);
+}
+
+@include mobile {
+  .header-table {
+    tr,
+    td {
+      display: block;
+      width: auto;
+    }
+  }
+
+  .header-name {
+    width: auto;
+    padding-bottom: 0;
   }
 }
 </style>

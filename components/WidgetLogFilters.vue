@@ -20,6 +20,18 @@
       </select>
     </div>
 
+    <div class="form-group search-group">
+      <label for="log-search">Поиск</label>
+      <input
+        id="log-search"
+        type="text"
+        class="input"
+        :value="search"
+        placeholder="URL или сообщение"
+        @input="$emit('update:search', ($event.target as HTMLInputElement).value)"
+      >
+    </div>
+
     <div class="form-group">
       <label for="log-limit">На странице</label>
       <select id="log-limit" :value="limit" class="input" @change="$emit('update:limit', Number(($event.target as HTMLSelectElement).value)); $emit('limitChange')">
@@ -37,12 +49,14 @@ defineProps<{
   dates: string[]
   selectedDate: string
   levelFilter: string
+  search: string
   limit: number
 }>()
 
 defineEmits<{
   'update:selectedDate': [value: string]
   'update:levelFilter': [value: string]
+  'update:search': [value: string]
   'update:limit': [value: number]
   dateChange: []
   limitChange: []
@@ -67,6 +81,10 @@ defineEmits<{
     @include mobile {
       min-width: 0;
     }
+  }
+
+  .search-group {
+    flex: 1;
   }
 }
 </style>

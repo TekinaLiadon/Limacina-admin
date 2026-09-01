@@ -46,6 +46,15 @@ export const useApi = () => {
     return refreshInFlight
   }
 
+  const invalidateSession = () => {
+    const refreshToken = readCookie(REFRESH_COOKIE)
+    if (!refreshToken) return
+    $fetch(`${baseURL}${ApiEndpoint.AuthInvalidate}`, {
+      method: 'POST',
+      body: { refresh_token: refreshToken },
+    }).catch(() => {})
+  }
+
   const request = async <T>(
     path: string,
     options: {
@@ -86,6 +95,7 @@ export const useApi = () => {
     } catch (e) {
       const err = toFetchError(e)
       if (err.statusCode === 401) {
+        invalidateSession()
         writeCookie(ACCESS_COOKIE, null)
         writeCookie(REFRESH_COOKIE, null)
         error.value = 'Unauthorized'
@@ -105,5 +115,6 @@ export const useApi = () => {
     post: <T>(path: string, body?: RequestBody) => request<T>(path, { method: 'POST', body }),
     patch: <T>(path: string, body?: RequestBody) => request<T>(path, { method: 'PATCH', body }),
     del: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
+    invalidateSession,
   }
 }

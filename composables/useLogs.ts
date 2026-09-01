@@ -2,32 +2,59 @@ import { type LogEntry, parseLines } from '~/utils/logHelpers'
 import { ApiEndpoint } from '~/api/endpoints'
 import type { LogPage } from '~/api/types'
 
+const LEVELS = ['10', '20', '30', '40', '50', '60']
+const LIMITS = [100, 250, 500, 1000]
+const DEFAULT_LIMIT = 100
+
+const queryString = (value: unknown) => (typeof value === 'string' ? value : '')
+
 export const useLogs = () => {
   const { get } = useApi()
+  const route = useRoute()
+  const router = useRouter()
 
   const dates = ref<string[]>([])
   const selectedDate = ref('')
   const parsedLines = ref<LogEntry[]>([])
   const rawLines = ref<string[]>([])
   const offset = ref(0)
-  const limit = ref(100)
+  const limit = ref(DEFAULT_LIMIT)
   const total = ref(0)
   const loading = ref(true)
   const error = ref('')
   const levelFilter = ref('')
+  const searchQuery = ref('')
   const expandedRow = ref<number | null>(null)
+
+  const queryLevel = queryString(route.query.level)
+  if (LEVELS.includes(queryLevel)) levelFilter.value = queryLevel
+
+  const queryLimit = Number(queryString(route.query.limit))
+  if (LIMITS.includes(queryLimit)) limit.value = queryLimit
+
+  const queryDate = queryString(route.query.date)
+  const queryPage = Number(queryString(route.query.page))
+  if (Number.isInteger(queryPage) && queryPage > 1) {
+    offset.value = (queryPage - 1) * limit.value
+  }
 
   const toggleRow = (i: number) => {
     expandedRow.value = expandedRow.value === i ? null : i
   }
 
-  const applyLevelFilter = () => {
-    const all = parseLines(rawLines.value)
+  const applyFilters = () => {
+    let entries = parseLines(rawLines.value)
     if (levelFilter.value) {
-      parsedLines.value = all.filter((e) => e.level === Number(levelFilter.value))
-    } else {
-      parsedLines.value = all
+      entries = entries.filter((e) => e.level === Number(levelFilter.value))
     }
+    const search = searchQuery.value.trim().toLowerCase()
+    if (search) {
+      entries = entries.filter((e) =>
+        (e.req?.url ?? '').toLowerCase().includes(search) ||
+        (e.msg ?? '').toLowerCase().includes(search) ||
+        (e.err?.message ?? '').toLowerCase().includes(search))
+    }
+    parsedLines.value = entries
   }
 
   const fetchLogs = async () => {
@@ -48,7 +75,7 @@ export const useLogs = () => {
         rawLines.value = data.value.lines
         total.value = data.value.total
         offset.value = data.value.offset
-        applyLevelFilter()
+        applyFilters()
       }
     } finally {
       loading.value = false
@@ -67,7 +94,7 @@ export const useLogs = () => {
       }
       if (data.value?.length) {
         dates.value = data.value
-        selectedDate.value = data.value[0]
+        selectedDate.value = data.value.includes(queryDate) ? queryDate : data.value[0]
         await fetchLogs()
       }
     } finally {
@@ -98,14 +125,22 @@ export const useLogs = () => {
   const currentPage = computed(() => Math.floor(offset.value / limit.value) + 1)
   const totalPages = computed(() => Math.ceil(total.value / limit.value))
 
-  watch(levelFilter, () => {
-    applyLevelFilter()
-  })
+  const syncQuery = () => {
+    const query: Record<string, string> = {}
+    if (selectedDate.value) query.date = selectedDate.value
+    if (levelFilter.value) query.level = levelFilter.value
+    if (limit.value !== DEFAULT_LIMIT) query.limit = String(limit.value)
+    if (currentPage.value > 1) query.page = String(currentPage.value)
+    router.replace({ query })
+  }
+
+  watch([selectedDate, levelFilter, limit, offset], syncQuery)
+  watch([levelFilter, searchQuery], applyFilters)
 
   return {
     dates, selectedDate, parsedLines, offset, limit, total,
     currentPage, totalPages,
-    loading, error, levelFilter, expandedRow,
+    loading, error, levelFilter, searchQuery, expandedRow,
     toggleRow, fetchDates, fetchLogs, onDateChange, prevPage, nextPage, goToPage,
   }
 }

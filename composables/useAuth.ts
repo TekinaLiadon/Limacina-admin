@@ -4,6 +4,7 @@ import type { AuthResponse } from '~/api/types'
 
 export const useAuth = () => {
   const config = useRuntimeConfig()
+  const { invalidateSession } = useApi()
 
   const login = async (username: string, password: string) => {
     const res = await $fetch<AuthResponse>(`${config.public.apiBase}${ApiEndpoint.AuthLogin}`, {
@@ -28,6 +29,7 @@ export const useAuth = () => {
   }
 
   const logout = () => {
+    invalidateSession()
     writeCookie('auth_token', null)
     writeCookie('refresh_token', null)
     navigateTo('/login')
