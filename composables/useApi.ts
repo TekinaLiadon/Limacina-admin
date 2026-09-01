@@ -1,13 +1,14 @@
 import { readCookie, writeCookie } from '~/utils/authCookies'
 import { buildQuery, type QueryParams } from '~/api/query'
 import { ApiEndpoint } from '~/api/endpoints'
-import { toFetchError } from '~/api/errors'
+import { toFetchError, fetchErrorMessage } from '~/api/errors'
 import type { AuthResponse } from '~/api/types'
 
 interface ApiResponse<T> {
   data: Ref<T | null>
   error: Ref<string | null>
   pending: Ref<boolean>
+  cause: Ref<unknown>
 }
 
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE'
@@ -65,6 +66,7 @@ export const useApi = () => {
   ): Promise<ApiResponse<T>> => {
     const data = ref<T | null>(null) as Ref<T | null>
     const error = ref<string | null>(null)
+    const cause = ref<unknown>(null)
     const pending = ref(true)
 
     const url = `${baseURL}${path}${buildQuery(options.query)}`
@@ -94,6 +96,7 @@ export const useApi = () => {
       }
     } catch (e) {
       const err = toFetchError(e)
+      cause.value = e
       if (err.statusCode === 401) {
         invalidateSession()
         writeCookie(ACCESS_COOKIE, null)
@@ -101,13 +104,13 @@ export const useApi = () => {
         error.value = 'Unauthorized'
         navigateTo('/login')
       } else {
-        error.value = err.data?.errorMessage || err.message || 'Request failed'
+        error.value = fetchErrorMessage(e) || 'Request failed'
       }
     } finally {
       pending.value = false
     }
 
-    return { data, error, pending }
+    return { data, error, pending, cause }
   }
 
   return {

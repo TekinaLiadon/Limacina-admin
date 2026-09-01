@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import { toFetchError } from '~/api/errors'
+import { fetchErrorMessage } from '~/api/errors'
 
 definePageMeta({
   layout: 'default',
@@ -27,7 +27,7 @@ const handleLogin = async (username: string, password: string) => {
   try {
     await login(username, password)
   } catch (e) {
-    error.value = toFetchError(e).message || 'Неверное имя пользователя или пароль'
+    error.value = fetchErrorMessage(e) || 'Неверное имя пользователя или пароль'
   } finally {
     pending.value = false
   }

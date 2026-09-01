@@ -39,7 +39,7 @@ describe('useApi — successful requests', () => {
   it('returns data on success', async () => {
     fetchMock.mockImplementation(() => ok({ value: 42 }))
 
-    const { data, error, pending } = await useApi().get<{ value: number }>('/admin/users')
+    const { data, error, pending } = await useApi().get<{ value: number }>('/v1/panel/users')
 
     expect(data.value).toEqual({ value: 42 })
     expect(error.value).toBeNull()
@@ -50,7 +50,7 @@ describe('useApi — successful requests', () => {
     writeCookie('auth_token', 'access-1')
     fetchMock.mockImplementation(() => ok({}))
 
-    await useApi().get('/admin/users')
+    await useApi().get('/v1/panel/users')
 
     expect(fetchMock.mock.calls[0][1].headers).toEqual({ Authorization: 'Bearer access-1' })
   })
@@ -58,7 +58,7 @@ describe('useApi — successful requests', () => {
   it('sends no Authorization header without cookie', async () => {
     fetchMock.mockImplementation(() => ok({}))
 
-    await useApi().get('/admin/users')
+    await useApi().get('/v1/panel/users')
 
     expect(fetchMock.mock.calls[0][1].headers).toEqual({})
   })
@@ -66,18 +66,18 @@ describe('useApi — successful requests', () => {
   it('serializes query params', async () => {
     fetchMock.mockImplementation(() => ok({}))
 
-    await useApi().get('/admin/logs', { date: '2026-01-01', limit: 100 })
+    await useApi().get('/v1/panel/logs', { date: '2026-01-01', limit: 100 })
 
-    expect(fetchMock.mock.calls[0][0]).toBe(`${API}/admin/logs?date=2026-01-01&limit=100`)
+    expect(fetchMock.mock.calls[0][0]).toBe(`${API}/v1/panel/logs?date=2026-01-01&limit=100`)
   })
 
   it('passes method and body for post, patch and del', async () => {
     fetchMock.mockImplementation(() => ok({ success: true }))
     const { post, patch, del } = useApi()
 
-    await post('/admin/users', { username: 'john' })
-    await patch('/admin/approve', { username: 'john', approved: true })
-    await del('/admin/users/john')
+    await post('/v1/panel/users', { username: 'john' })
+    await patch('/v1/panel/users/approve', { username: 'john', approved: true })
+    await del('/v1/panel/users/john')
 
     expect(fetchMock.mock.calls[0][1]).toMatchObject({ method: 'POST', body: { username: 'john' } })
     expect(fetchMock.mock.calls[1][1]).toMatchObject({ method: 'PATCH', body: { username: 'john', approved: true } })
@@ -86,27 +86,36 @@ describe('useApi — successful requests', () => {
 })
 
 describe('useApi — errors', () => {
-  it('sets error from response errorMessage', async () => {
-    fetchMock.mockImplementation(() => fail(500, { errorMessage: 'Внутренняя ошибка' }))
+  it('sets error from response message', async () => {
+    fetchMock.mockImplementation(() => fail(500, { message: 'Внутренняя ошибка' }))
 
-    const { data, error } = await useApi().get('/admin/users')
+    const { data, error } = await useApi().get('/v1/panel/users')
 
     expect(data.value).toBeNull()
     expect(error.value).toBe('Внутренняя ошибка')
   })
 
-  it('falls back to error message when no errorMessage in response', async () => {
+  it('takes the first message from validation errors array', async () => {
+    fetchMock.mockImplementation(() => fail(400, { message: ['limit must be an integer', 'limit must be positive'] }))
+
+    const { error } = await useApi().get('/v1/panel/users')
+
+    expect(error.value).toBe('limit must be an integer')
+  })
+
+  it('falls back to error message when no message in response', async () => {
     fetchMock.mockImplementation(() => fail(503))
 
-    const { error } = await useApi().get('/admin/users')
+    const { error, cause } = await useApi().get('/v1/panel/users')
 
     expect(error.value).toBe('Request failed with 503')
+    expect(cause.value).toBeTruthy()
   })
 
   it('falls back to a generic message', async () => {
     fetchMock.mockImplementation(() => Promise.reject(new Error()))
 
-    const { error } = await useApi().get('/admin/users')
+    const { error } = await useApi().get('/v1/panel/users')
 
     expect(error.value).toBe('Request failed')
   })
@@ -120,7 +129,7 @@ describe('useApi — session invalidation', () => {
     useApi().invalidateSession()
     await Promise.resolve()
 
-    expect(fetchMock).toHaveBeenCalledWith(`${API}/auth/invalidate`, {
+    expect(fetchMock).toHaveBeenCalledWith(`${API}/v1/common/auth/invalidate`, {
       method: 'POST',
       body: { refresh_token: 'r-1' },
     })
@@ -148,12 +157,12 @@ describe('useApi — session invalidation', () => {
     writeCookie('refresh_token', 'dead-refresh')
 
     fetchMock.mockImplementation((url: string) =>
-      url === `${API}/auth/invalidate` ? ok({ success: true }) : fail(401),
+      url === `${API}/v1/common/auth/invalidate` ? ok({ success: true }) : fail(401),
     )
 
-    await useApi().get('/admin/users')
+    await useApi().get('/v1/panel/users')
 
-    expect(fetchMock).toHaveBeenCalledWith(`${API}/auth/invalidate`, {
+    expect(fetchMock).toHaveBeenCalledWith(`${API}/v1/common/auth/invalidate`, {
       method: 'POST',
       body: { refresh_token: 'dead-refresh' },
     })
@@ -164,14 +173,14 @@ describe('useApi — session invalidation', () => {
     writeCookie('refresh_token', 'old-refresh')
 
     fetchMock.mockImplementation((url: string) => {
-      if (url === `${API}/auth/refresh`) return ok(tokens('new-access', 'new-refresh'))
-      if (url === `${API}/auth/invalidate`) return ok({ success: true })
+      if (url === `${API}/v1/common/auth/refresh`) return ok(tokens('new-access', 'new-refresh'))
+      if (url === `${API}/v1/common/auth/invalidate`) return ok({ success: true })
       return fail(401)
     })
 
-    await useApi().get('/admin/users')
+    await useApi().get('/v1/panel/users')
 
-    expect(fetchMock).toHaveBeenCalledWith(`${API}/auth/invalidate`, {
+    expect(fetchMock).toHaveBeenCalledWith(`${API}/v1/common/auth/invalidate`, {
       method: 'POST',
       body: { refresh_token: 'new-refresh' },
     })
@@ -185,18 +194,18 @@ describe('useApi — token refresh on 401', () => {
 
     let usersCalls = 0
     fetchMock.mockImplementation((url: string) => {
-      if (url === `${API}/auth/refresh`) return ok(tokens('new-access', 'new-refresh'))
+      if (url === `${API}/v1/common/auth/refresh`) return ok(tokens('new-access', 'new-refresh'))
       usersCalls++
       return usersCalls === 1 ? fail(401) : ok([{ uuid: 'u1' }])
     })
 
-    const { data, error } = await useApi().get('/admin/users')
+    const { data, error } = await useApi().get('/v1/panel/users')
 
     expect(data.value).toEqual([{ uuid: 'u1' }])
     expect(error.value).toBeNull()
     expect(fetchMock).toHaveBeenCalledTimes(3)
 
-    expect(fetchMock).toHaveBeenCalledWith(`${API}/auth/refresh`, {
+    expect(fetchMock).toHaveBeenCalledWith(`${API}/v1/common/auth/refresh`, {
       method: 'POST',
       body: { refresh_token: 'old-refresh' },
     })
@@ -212,10 +221,10 @@ describe('useApi — token refresh on 401', () => {
     writeCookie('refresh_token', 'dead-refresh')
 
     fetchMock.mockImplementation((url: string) =>
-      url === `${API}/auth/refresh` ? fail(401) : fail(401),
+      url === `${API}/v1/common/auth/refresh` ? fail(401) : fail(401),
     )
 
-    const { data, error } = await useApi().get('/admin/users')
+    const { data, error } = await useApi().get('/v1/panel/users')
 
     expect(data.value).toBeNull()
     expect(error.value).toBe('Unauthorized')
@@ -228,7 +237,7 @@ describe('useApi — token refresh on 401', () => {
     writeCookie('auth_token', 'old-access')
     fetchMock.mockImplementation(() => fail(401))
 
-    const { error } = await useApi().get('/admin/users')
+    const { error } = await useApi().get('/v1/panel/users')
 
     expect(error.value).toBe('Unauthorized')
     expect(fetchMock).toHaveBeenCalledTimes(1)
@@ -240,10 +249,10 @@ describe('useApi — token refresh on 401', () => {
     writeCookie('refresh_token', 'old-refresh')
 
     fetchMock.mockImplementation((url: string) =>
-      url === `${API}/auth/refresh` ? ok(tokens('new-access', 'new-refresh')) : fail(401),
+      url === `${API}/v1/common/auth/refresh` ? ok(tokens('new-access', 'new-refresh')) : fail(401),
     )
 
-    const { data, error } = await useApi().get('/admin/users')
+    const { data, error } = await useApi().get('/v1/panel/users')
 
     expect(data.value).toBeNull()
     expect(error.value).toBe('Unauthorized')
@@ -256,7 +265,7 @@ describe('useApi — token refresh on 401', () => {
     writeCookie('refresh_token', 'old-refresh')
 
     fetchMock.mockImplementation((url: string) => {
-      if (url === `${API}/auth/refresh`) return ok(tokens('new-access', 'new-refresh'))
+      if (url === `${API}/v1/common/auth/refresh`) return ok(tokens('new-access', 'new-refresh'))
       if (url === `${API}/page/a` || url === `${API}/page/b`) {
         const failed = fetchMock.mock.calls.filter((c) => c[0] === url).length === 1
         return failed ? fail(401) : ok({ ok: true })
@@ -270,7 +279,7 @@ describe('useApi — token refresh on 401', () => {
     expect(resA.data.value).toEqual({ ok: true })
     expect(resB.data.value).toEqual({ ok: true })
 
-    const refreshCalls = fetchMock.mock.calls.filter((c) => c[0] === `${API}/auth/refresh`)
+    const refreshCalls = fetchMock.mock.calls.filter((c) => c[0] === `${API}/v1/common/auth/refresh`)
     expect(refreshCalls).toHaveLength(1)
   })
 })

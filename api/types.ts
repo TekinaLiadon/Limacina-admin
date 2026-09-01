@@ -35,9 +35,15 @@ export interface LauncherPlatform {
   arch: string
 }
 
+export interface LauncherVersionInfo {
+  version: string
+  platforms: LauncherPlatform[]
+}
+
 export interface LauncherVersion {
   version: string
   platforms: LauncherPlatform[]
+  versions?: LauncherVersionInfo[]
 }
 
 export interface LauncherConfig {

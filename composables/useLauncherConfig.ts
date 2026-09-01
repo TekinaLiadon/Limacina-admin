@@ -1,4 +1,5 @@
 import { ApiEndpoint } from '~/api/endpoints'
+import { toFetchError } from '~/api/errors'
 import type { LauncherConfig } from '~/api/types'
 
 export type { LauncherConfig } from '~/api/types'
@@ -26,7 +27,7 @@ const defaultConfig = (): LauncherConfigForm => ({
 })
 
 export const useLauncherConfig = () => {
-  const { get, post, patch } = useApi()
+  const { get, patch } = useApi()
 
   const config = ref<LauncherConfig | null>(null)
   const isNew = ref(false)
@@ -45,7 +46,7 @@ export const useLauncherConfig = () => {
     try {
       const res = await get<LauncherConfig>(ApiEndpoint.LauncherConfig)
 
-      if (res.error.value) {
+      if (res.error.value && toFetchError(res.cause.value).statusCode !== 404) {
         error.value = res.error.value
       } else if (res.data.value) {
         config.value = res.data.value
@@ -61,7 +62,6 @@ export const useLauncherConfig = () => {
           jvmArgs: config.value.jvmArgs?.join(' ') || '',
         })
       } else {
-        config.value = null
         isNew.value = true
         Object.assign(form, defaultConfig())
       }
@@ -87,9 +87,7 @@ export const useLauncherConfig = () => {
     }
 
     try {
-      const res = isNew.value
-        ? await post<LauncherConfig>(ApiEndpoint.LauncherConfig, body)
-        : await patch<LauncherConfig>(ApiEndpoint.AdminConfig, body)
+      const res = await patch<LauncherConfig>(ApiEndpoint.AdminConfig, body)
 
       if (res.error.value) {
         saveError.value = res.error.value

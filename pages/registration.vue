@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { toFetchError } from '~/api/errors'
+import { fetchErrorMessage } from '~/api/errors'
 
 definePageMeta({
   layout: 'default',
@@ -32,7 +32,7 @@ const handleRegister = async (username: string, password: string) => {
     success.value = 'Владелец создан. Через несколько секунд вы будете перенаправлены на страницу входа.'
     setTimeout(() => navigateTo('/login'), 2000)
   } catch (e) {
-    error.value = toFetchError(e).data?.errorMessage || 'Ошибка регистрации'
+    error.value = fetchErrorMessage(e) || 'Ошибка регистрации'
   } finally {
     pending.value = false
   }
