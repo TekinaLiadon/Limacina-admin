@@ -1,4 +1,4 @@
-import { readCookie, writeCookie, ROLE_COOKIE } from '~/utils/authCookies'
+import { readCookie, writeCookie, ROLE_COOKIE, USER_NAME_COOKIE } from '~/utils/authCookies'
 import { buildQuery, type QueryParams } from '~/api/query'
 import { ApiEndpoint } from '~/api/endpoints'
 import { toFetchError, fetchErrorMessage } from '~/api/errors'
@@ -37,6 +37,7 @@ export const useApi = () => {
           writeCookie(ACCESS_COOKIE, res.tokens.access_token)
           writeCookie(REFRESH_COOKIE, res.tokens.refresh_token)
           if (res.role) writeCookie(ROLE_COOKIE, res.role)
+          if (res.username) writeCookie(USER_NAME_COOKIE, res.username)
           return true
         } catch {
           return false
@@ -103,6 +104,7 @@ export const useApi = () => {
         writeCookie(ACCESS_COOKIE, null)
         writeCookie(REFRESH_COOKIE, null)
         writeCookie(ROLE_COOKIE, null)
+        writeCookie(USER_NAME_COOKIE, null)
         error.value = 'Unauthorized'
         navigateTo('/login')
       } else {

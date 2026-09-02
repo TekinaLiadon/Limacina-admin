@@ -1,5 +1,5 @@
 import { ApiEndpoint, endpointUrl } from '~/api/endpoints'
-import type { DeletedUserListItem, Page } from '~/api/types'
+import { isPage, PAGE_FORMAT_ERROR, type DeletedUserListItem, type Page } from '~/api/types'
 import { clampPage, totalPagesOf } from '~/utils/pagination'
 import { debounce } from '~/utils/debounce'
 
@@ -34,10 +34,12 @@ export const useDeletedUsers = () => {
 
       if (err.value) {
         error.value = err.value
-      } else if (data.value) {
+      } else if (isPage<DeletedUserListItem>(data.value)) {
         users.value = data.value.items
         total.value = data.value.total
         page.value = clampPage(page.value, totalPages.value)
+      } else if (data.value) {
+        error.value = PAGE_FORMAT_ERROR
       }
     } finally {
       loading.value = false

@@ -24,9 +24,10 @@ const ok = <T>(data: T) => Promise.resolve(data)
 const fail = (statusCode: number, data?: Record<string, unknown>) =>
   Promise.reject(Object.assign(new Error(`Request failed with ${statusCode}`), { statusCode, data }))
 
-const tokens = (access_token: string, refresh_token: string, role = 'admin') => ({
+const tokens = (access_token: string, refresh_token: string, role = 'admin', username = 'john') => ({
   tokens: { access_token, refresh_token },
   role,
+  username,
 })
 
 beforeEach(() => {
@@ -35,6 +36,7 @@ beforeEach(() => {
   writeCookie('auth_token', null)
   writeCookie('refresh_token', null)
   writeCookie('user_role', null)
+  writeCookie('user_name', null)
 })
 
 describe('useApi — successful requests', () => {
@@ -216,6 +218,7 @@ describe('useApi — token refresh on 401', () => {
     expect(readCookie('auth_token')).toBe('new-access')
     expect(readCookie('refresh_token')).toBe('new-refresh')
     expect(readCookie('user_role')).toBe('admin')
+    expect(readCookie('user_name')).toBe('john')
     expect(navigateMock).not.toHaveBeenCalled()
   })
 
@@ -234,6 +237,7 @@ describe('useApi — token refresh on 401', () => {
     expect(readCookie('auth_token')).toBeNull()
     expect(readCookie('refresh_token')).toBeNull()
     expect(readCookie('user_role')).toBeNull()
+    expect(readCookie('user_name')).toBeNull()
     expect(navigateMock).toHaveBeenCalledWith('/login')
   })
 

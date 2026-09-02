@@ -17,6 +17,13 @@ export interface Page<T> {
   offset: number
 }
 
+export const isPage = <T>(value: unknown): value is Page<T> =>
+  typeof value === 'object' && value !== null &&
+  Array.isArray((value as Page<T>).items) &&
+  typeof (value as Page<T>).total === 'number'
+
+export const PAGE_FORMAT_ERROR = 'API вернул некорректные данные'
+
 export interface UserListItem {
   uuid: string
   username: string

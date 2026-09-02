@@ -1,5 +1,5 @@
 import { ApiEndpoint } from '~/api/endpoints'
-import type { Page, UserListItem } from '~/api/types'
+import { isPage, PAGE_FORMAT_ERROR, type Page, type UserListItem } from '~/api/types'
 import { clampPage, totalPagesOf } from '~/utils/pagination'
 
 export const UNAPPROVED_PER_PAGE = 10
@@ -29,10 +29,12 @@ export const useUnapprovedUsers = () => {
 
       if (err.value) {
         error.value = err.value
-      } else if (data.value) {
+      } else if (isPage<UserListItem>(data.value)) {
         users.value = data.value.items
         total.value = data.value.total
         page.value = clampPage(page.value, totalPages.value)
+      } else if (data.value) {
+        error.value = PAGE_FORMAT_ERROR
       }
     } finally {
       loading.value = false

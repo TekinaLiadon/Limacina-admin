@@ -1,4 +1,4 @@
-import { writeCookie, ROLE_COOKIE } from '~/utils/authCookies'
+import { writeCookie, ROLE_COOKIE, USER_NAME_COOKIE } from '~/utils/authCookies'
 import { ApiEndpoint } from '~/api/endpoints'
 import type { AuthResponse } from '~/api/types'
 
@@ -19,6 +19,7 @@ export const useAuth = () => {
     writeCookie('auth_token', res.tokens.access_token)
     writeCookie('refresh_token', res.tokens.refresh_token)
     writeCookie(ROLE_COOKIE, res.role)
+    writeCookie(USER_NAME_COOKIE, res.username)
     navigateTo('/unapproved')
   }
 
@@ -34,6 +35,7 @@ export const useAuth = () => {
     writeCookie('auth_token', null)
     writeCookie('refresh_token', null)
     writeCookie(ROLE_COOKIE, null)
+    writeCookie(USER_NAME_COOKIE, null)
     navigateTo('/login')
   }
 
