@@ -32,14 +32,11 @@
                 <span v-else class="text-muted">—</span>
               </td>
               <td class="col-expand">
-                <AppButton
-                  variant="ghost"
-                  size="sm"
-                  class="expand-btn"
-                  @click.stop="$emit('toggleRow', i)"
-                >
-                  {{ expandedRow === i ? 'Свернуть' : 'Подробнее' }}
-                </AppButton>
+                <span :class="['expand-toggle', { 'is-open': expandedRow === i }]">
+                  <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+                    <path d="M2 4.5l4 3.5 4-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
+                  </svg>
+                </span>
               </td>
             </tr>
             <WidgetLogDetail
@@ -69,7 +66,11 @@
         <div class="log-card-url">{{ entry.req?.url || entry.msg || '—' }}</div>
         <div class="log-card-footer">
           <span v-if="entry.responseTime != null" class="log-card-time-value">{{ entry.responseTime }} мс</span>
-          <span class="log-card-expand">{{ expandedRow === i ? 'Свернуть' : 'Подробнее' }}</span>
+          <span :class="['log-card-expand', { 'is-open': expandedRow === i }]">
+            <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+              <path d="M2 4.5l4 3.5 4-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
+            </svg>
+          </span>
         </div>
         <WidgetLogDetail
           v-if="expandedRow === i"
@@ -151,25 +152,15 @@ defineEmits<{
       opacity: 1;
     }
 
-    .expand-btn {
-      opacity: 1;
+    .expand-toggle {
+      color: var(--text);
     }
   }
 
   &.row-expanded {
     background: var(--bg-hover);
     border-bottom-color: transparent;
-
-    .expand-btn {
-      opacity: 1;
-    }
   }
-}
-
-.expand-btn {
-  opacity: 0;
-  transition: opacity 0.15s;
-  white-space: nowrap;
 }
 
 .col-time {
@@ -181,7 +172,7 @@ defineEmits<{
 }
 
 .col-method {
-  width: 60px;
+  width: 90px;
   text-transform: uppercase;
   color: var(--primary);
   white-space: nowrap;
@@ -216,7 +207,22 @@ defineEmits<{
 }
 
 .col-expand {
-  width: 90px;
+  width: 44px;
+  text-align: center;
+}
+
+.expand-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transform: rotate(0deg);
+  transition: transform 0.15s, color 0.15s;
+
+  &.is-open {
+    transform: rotate(180deg);
+    color: var(--primary);
+  }
 }
 
 .text-muted {
@@ -292,10 +298,15 @@ defineEmits<{
 }
 
 .log-card-expand {
-  font-size: 0.6875rem;
-  color: var(--primary);
-  font-family: var(--font-mono);
-  letter-spacing: 0.053em;
-  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: transform 0.15s, color 0.15s;
+
+  &.is-open {
+    transform: rotate(180deg);
+    color: var(--primary);
+  }
 }
 </style>

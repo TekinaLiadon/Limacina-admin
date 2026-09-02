@@ -8,6 +8,38 @@
     </div>
 
     <div class="form-group">
+      <label for="log-status">Код ответа</label>
+      <select id="log-status" :value="statusCode" class="input" @change="$emit('update:statusCode', ($event.target as HTMLSelectElement).value)">
+        <option value="">Все</option>
+        <option v-for="code in STATUS_CODES" :key="code" :value="String(code)">{{ code }}</option>
+      </select>
+    </div>
+
+    <div class="form-group filter-group">
+      <label for="log-url">URL</label>
+      <input
+        id="log-url"
+        type="text"
+        class="input"
+        :value="url"
+        placeholder="/v1/common/auth"
+        @input="$emit('update:url', ($event.target as HTMLInputElement).value)"
+      >
+    </div>
+
+    <div class="form-group filter-group">
+      <label for="log-ip">IP</label>
+      <input
+        id="log-ip"
+        type="text"
+        class="input"
+        :value="ip"
+        placeholder="127.0.0.1"
+        @input="$emit('update:ip', ($event.target as HTMLInputElement).value)"
+      >
+    </div>
+
+    <div class="form-group">
       <label for="log-level">Уровень</label>
       <select id="log-level" :value="levelFilter" class="input" @change="$emit('update:levelFilter', ($event.target as HTMLSelectElement).value)">
         <option value="">Все</option>
@@ -18,18 +50,6 @@
         <option value="50">Error</option>
         <option value="60">Fatal</option>
       </select>
-    </div>
-
-    <div class="form-group search-group">
-      <label for="log-search">Поиск</label>
-      <input
-        id="log-search"
-        type="text"
-        class="input"
-        :value="search"
-        placeholder="URL или сообщение"
-        @input="$emit('update:search', ($event.target as HTMLInputElement).value)"
-      >
     </div>
 
     <div class="form-group">
@@ -45,18 +65,24 @@
 </template>
 
 <script setup lang="ts">
+const STATUS_CODES = [200, 201, 204, 400, 401, 403, 404, 409, 429, 500, 502, 503]
+
 defineProps<{
   dates: string[]
   selectedDate: string
+  statusCode: string
+  url: string
+  ip: string
   levelFilter: string
-  search: string
   limit: number
 }>()
 
 defineEmits<{
   'update:selectedDate': [value: string]
+  'update:statusCode': [value: string]
+  'update:url': [value: string]
+  'update:ip': [value: string]
   'update:levelFilter': [value: string]
-  'update:search': [value: string]
   'update:limit': [value: number]
   dateChange: []
   limitChange: []
@@ -68,6 +94,7 @@ defineEmits<{
 
 .logs-controls {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
   margin-bottom: 16px;
 
@@ -80,11 +107,13 @@ defineEmits<{
 
     @include mobile {
       min-width: 0;
+      width: 100%;
     }
   }
 
-  .search-group {
+  .filter-group {
     flex: 1;
+    min-width: 200px;
   }
 }
 </style>

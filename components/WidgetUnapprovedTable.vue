@@ -9,7 +9,7 @@
         <template #row="{ item }">
           <tr>
             <td>{{ item.username }}</td>
-            <td>{{ formatDate(item.createdAt) }}</td>
+            <td>{{ item.role }}</td>
             <td>
               <AppButton
                 variant="success"
@@ -27,7 +27,7 @@
           <div class="user-card">
             <div class="user-card-info">
               <span class="user-card-name">{{ item.username }}</span>
-              <span class="user-card-date">{{ formatDate(item.createdAt) }}</span>
+              <span class="user-card-role">{{ item.role }}</span>
             </div>
             <AppButton
               variant="success"
@@ -54,12 +54,11 @@
 </template>
 
 <script setup lang="ts">
-import type { UnapprovedUser } from '~/api/types'
-import { formatDate } from '~/utils/format'
+import type { UserListItem } from '~/api/types'
 import { UNAPPROVED_PER_PAGE } from '~/composables/useUnapprovedUsers'
 
 defineProps<{
-  users: UnapprovedUser[]
+  users: UserListItem[]
   page: number
   total: number
   totalPages: number
@@ -74,9 +73,9 @@ defineEmits<{
   approve: [username: string]
 }>()
 
-const columns = ['Имя пользователя', 'Дата регистрации', 'Действие']
+const columns = ['Имя пользователя', 'Роль', 'Действие']
 
-const userKey = (user: UnapprovedUser) => user.username
+const userKey = (user: UserListItem) => user.username
 </script>
 
 <style lang="scss" scoped>
@@ -108,9 +107,11 @@ const userKey = (user: UnapprovedUser) => user.username
   color: var(--text-bright);
 }
 
-.user-card-date {
+.user-card-role {
   font-family: var(--font-mono);
   font-size: 0.6875rem;
+  letter-spacing: 0.058em;
+  text-transform: uppercase;
   color: var(--text-muted);
 }
 

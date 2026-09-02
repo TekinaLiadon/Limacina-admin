@@ -10,6 +10,13 @@ export interface AuthResponse {
   role: string
 }
 
+export interface Page<T> {
+  items: T[]
+  total: number
+  limit: number
+  offset: number
+}
+
 export interface UserListItem {
   uuid: string
   username: string
@@ -18,8 +25,12 @@ export interface UserListItem {
   banned: boolean
 }
 
-export interface UnapprovedUser extends UserListItem {
-  createdAt?: string
+export interface DeletedUserListItem {
+  username: string
+  role: string
+  approved: boolean
+  banned: boolean
+  deletedAt: string
 }
 
 export interface LogPage {
@@ -43,7 +54,7 @@ export interface LauncherVersionInfo {
 export interface LauncherVersion {
   version: string
   platforms: LauncherPlatform[]
-  versions?: LauncherVersionInfo[]
+  versions: LauncherVersionInfo[]
 }
 
 export interface LauncherConfig {

@@ -15,6 +15,7 @@ describe('ApiEndpoint', () => {
 
   it('template endpoints declare path params', () => {
     expect(ApiEndpoint.AdminUser).toBe('/v1/panel/users/:username')
+    expect(ApiEndpoint.AdminUserRestore).toBe('/v1/panel/users/:username/restore')
     expect(ApiEndpoint.LauncherDownload).toBe('/v1/launcher/update/:os/:arch/download')
   })
 })
@@ -22,6 +23,10 @@ describe('ApiEndpoint', () => {
 describe('endpointUrl', () => {
   it('substitutes a single path param', () => {
     expect(endpointUrl(ApiEndpoint.AdminUser, { username: 'john' })).toBe('/v1/panel/users/john')
+  })
+
+  it('substitutes params in the restore endpoint', () => {
+    expect(endpointUrl(ApiEndpoint.AdminUserRestore, { username: 'john' })).toBe('/v1/panel/users/john/restore')
   })
 
   it('substitutes multiple path params', () => {

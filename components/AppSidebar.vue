@@ -8,7 +8,7 @@
 
     <nav class="sidebar-nav">
       <NuxtLink
-        v-for="item in navItems"
+        v-for="item in visibleNavItems"
         :key="item.path"
         :to="item.disabled ? undefined : item.path"
         class="nav-item"
@@ -22,6 +22,9 @@
 </template>
 
 <script setup lang="ts">
+import { navItems } from '~/utils/nav'
+import { ROLE_COOKIE } from '~/utils/authCookies'
+
 defineProps<{
   open: boolean
 }>()
@@ -31,6 +34,10 @@ defineEmits<{
 }>()
 
 const route = useRoute()
+const role = useCookie(ROLE_COOKIE)
+
+const visibleNavItems = computed(() =>
+  navItems.filter((item) => !item.ownerOnly || role.value === 'owner'))
 </script>
 
 <style lang="scss" scoped>
