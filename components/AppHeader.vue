@@ -7,10 +7,7 @@
       <h1 class="header-title">{{ pageTitle }}</h1>
     </div>
     <div class="header-right">
-      <div v-if="username || role" class="header-user">
-        <span v-if="username" class="user-name">{{ username }}</span>
-        <span v-if="role" class="badge" :class="`role-${role}`">{{ role }}</span>
-      </div>
+      <span v-if="username" class="user-name">{{ username }}</span>
       <AppButton variant="ghost" @click="logout">Выйти</AppButton>
     </div>
   </header>
@@ -18,7 +15,7 @@
 
 <script setup lang="ts">
 import { navTitles } from '~/utils/nav'
-import { ROLE_COOKIE, USER_NAME_COOKIE } from '~/utils/authCookies'
+import { USER_NAME_COOKIE } from '~/utils/authCookies'
 
 const route = useRoute()
 const { logout } = useAuth()
@@ -29,7 +26,6 @@ defineEmits<{
 
 const pageTitle = computed(() => navTitles[route.path] || 'Admin')
 const username = useCookie(USER_NAME_COOKIE)
-const role = useCookie(ROLE_COOKIE)
 </script>
 
 <style lang="scss" scoped>
@@ -62,14 +58,13 @@ const role = useCookie(ROLE_COOKIE)
   flex-shrink: 0;
 }
 
-.header-user {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
 .user-name {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  box-shadow: inset 0 0 0 1px var(--border);
   font-family: var(--font-mono);
   font-size: 0.6875rem;
   letter-spacing: 0.058em;
@@ -78,15 +73,7 @@ const role = useCookie(ROLE_COOKIE)
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.role-owner {
-  color: var(--violet);
-  box-shadow: inset 0 0 0 1px rgba(197, 138, 255, 0.22);
-}
-
-.role-admin {
-  color: var(--primary);
+  max-width: 200px;
 }
 
 .hamburger {
