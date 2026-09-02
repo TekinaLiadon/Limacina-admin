@@ -10,6 +10,7 @@ export enum ApiEndpoint {
   AdminDeletedUsers = '/v1/panel/users/deleted',
   AdminApprove = '/v1/panel/users/approve',
   AdminRole = '/v1/panel/users/role',
+  AdminSetOwner = '/v1/panel/users/owner',
   AdminBan = '/v1/panel/users/ban',
   AdminUserPassword = '/v1/panel/users/password',
   AdminLogs = '/v1/panel/logs',
