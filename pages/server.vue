@@ -6,20 +6,21 @@
         <AppButton
           variant="danger"
           :loading="restarting && restartMode === 'restart'"
-          :disabled="restarting"
+          :disabled="restarting || polling"
           @click="askRestart(false)"
         >
           Перезапустить сервер
         </AppButton>
         <AppButton
           variant="ghost"
-          :loading="restarting && restartMode === 'rebuild'"
-          :disabled="restarting"
+          :loading="(restarting || polling) && restartMode === 'rebuild'"
+          :disabled="restarting || polling"
           @click="askRestart(true)"
         >
           С пересборкой
         </AppButton>
       </div>
+      <AppAlert v-if="polling" message="Пересборка идёт — статус обновляется автоматически" type="success" />
       <AppAlert v-if="restarted" :message="restartedMessage" type="success" />
       <AppAlert v-if="restartError" :message="restartError" type="error" />
     </div>
@@ -99,7 +100,7 @@ definePageMeta({
   middleware: 'owner',
 })
 
-const { restarting, restartMode, error: restartError, restarted, restartServer } = useServerControl()
+const { restarting, polling, restartMode, error: restartError, restarted, restartServer } = useServerControl()
 const { username, password, saving, error, changed, valid, submit } = useUserPassword()
 const {
   username: ownerUsername, granting, error: ownerError, granted: ownerGranted,
@@ -120,7 +121,7 @@ const askRestart = (rebuild: boolean) => {
 
 const restartedMessage = computed(() =>
   restartMode.value === 'rebuild'
-    ? 'Бинарник пересобран, команда на перезапуск отправлена'
+    ? 'Бинарник пересобран, сервер перезапускается'
     : 'Команда на перезапуск отправлена — сервер вернётся через несколько секунд')
 
 const showOwnerConfirm = ref(false)

@@ -1,4 +1,7 @@
-import { readCookie, writeCookie, ROLE_COOKIE, USER_NAME_COOKIE } from '~/utils/authCookies'
+import {
+  readCookie, writeCookie, clearAuthCookies,
+  ACCESS_COOKIE, REFRESH_COOKIE, ROLE_COOKIE, USER_NAME_COOKIE,
+} from '~/utils/authCookies'
 import { buildQuery, type QueryParams } from '~/api/query'
 import { ApiEndpoint } from '~/api/endpoints'
 import { toFetchError, fetchErrorMessage } from '~/api/errors'
@@ -13,9 +16,6 @@ interface ApiResponse<T> {
 
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE'
 type RequestBody = Record<string, unknown> | FormData
-
-const ACCESS_COOKIE = 'auth_token'
-const REFRESH_COOKIE = 'refresh_token'
 
 let refreshInFlight: Promise<boolean> | null = null
 
@@ -101,11 +101,8 @@ export const useApi = () => {
       cause.value = e
       if (err.statusCode === 401) {
         invalidateSession()
-        writeCookie(ACCESS_COOKIE, null)
-        writeCookie(REFRESH_COOKIE, null)
-        writeCookie(ROLE_COOKIE, null)
-        writeCookie(USER_NAME_COOKIE, null)
-        error.value = 'Unauthorized'
+        clearAuthCookies()
+        error.value = 'Сессия истекла, войдите заново'
         navigateTo('/login')
       } else {
         error.value = fetchErrorMessage(e) || 'Request failed'

@@ -10,6 +10,12 @@ export interface AuthResponse {
   role: string
 }
 
+export interface InitOwnerRequest {
+  token: string
+  username: string
+  password: string
+}
+
 export interface Page<T> {
   items: T[]
   total: number
@@ -62,6 +68,13 @@ export interface LauncherVersion {
   version: string
   platforms: LauncherPlatform[]
   versions: LauncherVersionInfo[]
+}
+
+export interface RebuildStatus {
+  inProgress: boolean
+  lastError: string | null
+  revisionBefore: string | null
+  revisionAfter: string | null
 }
 
 export interface LauncherConfig {

@@ -2,6 +2,7 @@ export enum ApiEndpoint {
   AuthLogin = '/v1/common/auth/login',
   AuthRefresh = '/v1/common/auth/refresh',
   AuthInvalidate = '/v1/common/auth/invalidate',
+  AuthChangePassword = '/v1/common/auth/password',
   InitOwner = '/v1/panel/users/init-owner',
 
   AdminUsers = '/v1/panel/users',
@@ -18,6 +19,7 @@ export enum ApiEndpoint {
   AdminLauncher = '/v1/panel/launcher',
   AdminConfig = '/v1/panel/launcher/config',
   ServerRestart = '/v1/panel/server/restart',
+  ServerRebuildStatus = '/v1/panel/server/rebuild',
 
   LauncherVersion = '/v1/launcher/update/version',
   LauncherConfig = '/v1/launcher/config',

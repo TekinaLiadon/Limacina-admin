@@ -99,7 +99,6 @@ import {
 defineProps<{
   parsedLines: LogEntry[]
   expandedRow: number | null
-  offset: number
   limit: number
   total: number
   currentPage: number

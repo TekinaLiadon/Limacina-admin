@@ -233,7 +233,7 @@ describe('useApi — token refresh on 401', () => {
     const { data, error } = await useApi().get('/v1/panel/users')
 
     expect(data.value).toBeNull()
-    expect(error.value).toBe('Unauthorized')
+    expect(error.value).toBe('Сессия истекла, войдите заново')
     expect(readCookie('auth_token')).toBeNull()
     expect(readCookie('refresh_token')).toBeNull()
     expect(readCookie('user_role')).toBeNull()
@@ -247,7 +247,7 @@ describe('useApi — token refresh on 401', () => {
 
     const { error } = await useApi().get('/v1/panel/users')
 
-    expect(error.value).toBe('Unauthorized')
+    expect(error.value).toBe('Сессия истекла, войдите заново')
     expect(fetchMock).toHaveBeenCalledTimes(1)
     expect(navigateMock).toHaveBeenCalledWith('/login')
   })
@@ -263,7 +263,7 @@ describe('useApi — token refresh on 401', () => {
     const { data, error } = await useApi().get('/v1/panel/users')
 
     expect(data.value).toBeNull()
-    expect(error.value).toBe('Unauthorized')
+    expect(error.value).toBe('Сессия истекла, войдите заново')
     expect(readCookie('auth_token')).toBeNull()
     expect(readCookie('user_role')).toBeNull()
     expect(navigateMock).toHaveBeenCalledWith('/login')

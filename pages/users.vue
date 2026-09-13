@@ -9,6 +9,7 @@
       :loading="loading"
       :error="error"
       :acting="acting"
+      :action-error="actionError"
       @go-to-page="goToPage"
       @update:search="search = $event"
       @change-role="changeRole"
@@ -30,7 +31,7 @@ definePageMeta({
   layout: 'admin',
 })
 
-const { users, page, search, total, totalPages, loading, error, acting, fetchUsers, goToPage, changeRole, changeApproved, changeBanned, deleteUser } = useUsers()
+const { users, page, search, total, totalPages, loading, error, acting, actionError, fetchUsers, goToPage, changeRole, changeApproved, changeBanned, deleteUser } = useUsers()
 
 const showConfirm = ref(false)
 const deleteTarget = ref('')

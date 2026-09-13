@@ -10,7 +10,7 @@ export const useUserPassword = () => {
   const changed = ref(false)
 
   const valid = computed(() =>
-    username.value.trim() !== '' && password.value.trim().length >= 6)
+    username.value.trim() !== '' && password.value.length >= 6)
 
   const submit = async () => {
     if (!valid.value || saving.value) return
@@ -22,7 +22,7 @@ export const useUserPassword = () => {
     try {
       const { error: err } = await patch(ApiEndpoint.AdminUserPassword, {
         username: username.value.trim(),
-        password: password.value.trim(),
+        password: password.value,
       })
 
       if (err.value) {

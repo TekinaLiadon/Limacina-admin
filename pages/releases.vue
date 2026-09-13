@@ -12,7 +12,6 @@
       />
 
       <WidgetLauncherConfig
-        :config="config"
         :is-new="isNew"
         :form="configForm"
         :saving="saving"
@@ -34,7 +33,7 @@ const {
 } = useLauncherVersion()
 
 const {
-  config, isNew, form: configForm, loading: configLoading, error: configError,
+  isNew, form: configForm, loading: configLoading, error: configError,
   saving, saveError, saveSuccess, fetchConfig, saveConfig,
 } = useLauncherConfig()
 

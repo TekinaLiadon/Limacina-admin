@@ -4,6 +4,8 @@
       <AppButton variant="ghost" size="sm" @click="$emit('refresh')">Обновить</AppButton>
     </div>
 
+    <AppAlert v-if="actionError" :message="actionError" type="error" />
+
     <AppDataState :loading="loading" :error="error" :empty="!users.length" empty-text="Нет неодобренных пользователей">
       <AppResponsiveList :items="users" :columns="columns" :item-key="userKey">
         <template #row="{ item }">
@@ -65,6 +67,7 @@ defineProps<{
   loading: boolean
   error: string
   approving: string
+  actionError: string
 }>()
 
 defineEmits<{

@@ -8,6 +8,7 @@
     :loading="loading"
     :error="error"
     :restoring="restoring"
+    :action-error="actionError"
     @go-to-page="goToPage"
     @update:search="search = $event"
     @restore="restoreUser"
@@ -20,7 +21,7 @@ definePageMeta({
   middleware: 'owner',
 })
 
-const { users, page, search, total, totalPages, loading, error, restoring, fetchUsers, goToPage, restoreUser } = useDeletedUsers()
+const { users, page, search, total, totalPages, loading, error, restoring, actionError, fetchUsers, goToPage, restoreUser } = useDeletedUsers()
 
 onMounted(fetchUsers)
 </script>

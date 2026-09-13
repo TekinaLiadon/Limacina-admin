@@ -31,7 +31,7 @@
       </div>
       <AppAlert v-if="saveSuccess" :message="saveSuccess" type="success" />
       <AppAlert v-if="saveError" :message="saveError" type="error" />
-      <AppButton variant="primary" :loading="saving" @click="$emit('save')">
+      <AppButton variant="primary" :loading="saving" :disabled="form.online === null" @click="$emit('save')">
         {{ isNew ? 'Создать конфиг' : 'Сохранить' }}
       </AppButton>
     </div>
@@ -39,10 +39,9 @@
 </template>
 
 <script setup lang="ts">
-import type { LauncherConfig, LauncherConfigForm } from '~/composables/useLauncherConfig'
+import type { LauncherConfigForm } from '~/composables/useLauncherConfig'
 
 defineProps<{
-  config: LauncherConfig | null
   isNew: boolean
   form: LauncherConfigForm
   saving: boolean

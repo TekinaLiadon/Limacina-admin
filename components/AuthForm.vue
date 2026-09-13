@@ -34,6 +34,18 @@
         />
       </div>
 
+      <div v-if="withToken" class="form-group">
+        <label for="auth-token">Bootstrap-токен</label>
+        <input
+          id="auth-token"
+          v-model="token"
+          type="password"
+          class="input"
+          placeholder="токен из файла bootstrap.token на сервере"
+          required
+        />
+      </div>
+
       <AppButton type="submit" variant="primary" class="login-btn" :loading="pending">
         {{ submitLabel }}
       </AppButton>
@@ -45,20 +57,22 @@
 const props = defineProps<{
   title: string
   submitLabel: string
+  withToken?: boolean
   error?: string
   success?: string
   pending?: boolean
 }>()
 
 const emit = defineEmits<{
-  submit: [username: string, password: string]
+  submit: [username: string, password: string, token: string]
 }>()
 
 const username = ref('')
 const password = ref('')
+const token = ref('')
 
 const onSubmit = () => {
-  emit('submit', username.value, password.value)
+  emit('submit', username.value, password.value, token.value)
 }
 </script>
 

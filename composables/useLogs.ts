@@ -61,6 +61,7 @@ export const useLogs = () => {
       entries = entries.filter((e) => e.level === Number(levelFilter.value))
     }
     parsedLines.value = entries
+    expandedRow.value = null
   }
 
   const fetchLogs = async () => {
@@ -116,6 +117,11 @@ export const useLogs = () => {
     fetchLogs()
   }
 
+  const onLimitChange = () => {
+    offset.value = 0
+    fetchLogs()
+  }
+
   const applyFilters = debounce(() => {
     offset.value = 0
     fetchLogs()
@@ -161,6 +167,6 @@ export const useLogs = () => {
     dates, selectedDate, parsedLines, offset, limit, total,
     currentPage, totalPages,
     loading, error, levelFilter, urlFilter, ipFilter, statusCode, expandedRow,
-    toggleRow, fetchDates, fetchLogs, onDateChange, prevPage, nextPage, goToPage,
+    toggleRow, fetchDates, fetchLogs, onDateChange, onLimitChange, prevPage, nextPage, goToPage,
   }
 }

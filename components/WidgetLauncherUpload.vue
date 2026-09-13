@@ -31,6 +31,11 @@
           v-model="form.linuxArm"
         />
         <PlatformUploadCard
+          os="macOS"
+          arch="arm64"
+          v-model="form.macosArm"
+        />
+        <PlatformUploadCard
           os="Windows"
           arch="x86_64"
           v-model="form.windowsX86"

@@ -14,14 +14,13 @@
     @update:level-filter="levelFilter = $event"
     @update:limit="limit = $event"
     @date-change="onDateChange"
-    @limit-change="fetchLogs"
+    @limit-change="onLimitChange"
   />
 
   <AppDataState :loading="loading" :error="error" :empty="!parsedLines.length" :empty-text="emptyText">
     <WidgetLogTable
       :parsed-lines="parsedLines"
       :expanded-row="expandedRow"
-      :offset="offset"
       :limit="limit"
       :total="total"
       :current-page="currentPage"
@@ -38,10 +37,10 @@ definePageMeta({
 })
 
 const {
-  dates, selectedDate, parsedLines, offset, limit, total,
+  dates, selectedDate, parsedLines, limit, total,
   currentPage, totalPages,
   loading, error, levelFilter, urlFilter, ipFilter, statusCode, expandedRow,
-  toggleRow, fetchDates, fetchLogs, onDateChange, goToPage,
+  toggleRow, fetchDates, onDateChange, onLimitChange, goToPage,
 } = useLogs()
 
 const emptyText = computed(() =>

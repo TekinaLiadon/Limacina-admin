@@ -1,5 +1,7 @@
+import { ACCESS_COOKIE } from '~/utils/authCookies'
+
 export default defineNuxtRouteMiddleware((to) => {
-  const token = useCookie('auth_token', { maxAge: 60 * 60 * 24 * 30 })
+  const token = useCookie(ACCESS_COOKIE)
 
   const publicPaths = ['/login', '/registration']
 

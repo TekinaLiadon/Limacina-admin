@@ -5,6 +5,7 @@ export interface LauncherUploadForm {
   version: string
   linuxX86: File | null
   linuxArm: File | null
+  macosArm: File | null
   windowsX86: File | null
 }
 
@@ -15,6 +16,7 @@ export const useLauncherUpload = () => {
     version: '',
     linuxX86: null,
     linuxArm: null,
+    macosArm: null,
     windowsX86: null,
   })
 
@@ -32,6 +34,7 @@ export const useLauncherUpload = () => {
 
     if (form.linuxX86) formData.append('linux_x86_64', form.linuxX86)
     if (form.linuxArm) formData.append('linux_aarch64', form.linuxArm)
+    if (form.macosArm) formData.append('macos_arm64', form.macosArm)
     if (form.windowsX86) formData.append('windows_x86_64', form.windowsX86)
 
     const res = await patch(ApiEndpoint.AdminLauncher, formData)
@@ -42,6 +45,7 @@ export const useLauncherUpload = () => {
       uploadSuccess.value = 'Лаунчер обновлён'
       form.linuxX86 = null
       form.linuxArm = null
+      form.macosArm = null
       form.windowsX86 = null
 
       const versionRes = await get<LauncherVersion>(ApiEndpoint.LauncherVersion)

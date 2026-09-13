@@ -14,6 +14,8 @@
       </div>
     </div>
 
+    <AppAlert v-if="actionError" :message="actionError" type="error" />
+
     <AppDataState :loading="loading" :error="error" :empty="!users.length" empty-text="Нет удалённых пользователей">
       <AppResponsiveList :items="users" :columns="columns" :item-key="userKey">
         <template #row="{ item }">
@@ -96,6 +98,7 @@ defineProps<{
   loading: boolean
   error: string
   restoring: string
+  actionError: string
 }>()
 
 defineEmits<{

@@ -1,7 +1,15 @@
 const DEFAULT_MAX_AGE = 60 * 60 * 24 * 30
 
+export const ACCESS_COOKIE = 'auth_token'
+export const REFRESH_COOKIE = 'refresh_token'
 export const ROLE_COOKIE = 'user_role'
 export const USER_NAME_COOKIE = 'user_name'
+
+export const clearAuthCookies = () => {
+  for (const name of [ACCESS_COOKIE, REFRESH_COOKIE, ROLE_COOKIE, USER_NAME_COOKIE]) {
+    writeCookie(name, null)
+  }
+}
 
 export const readCookie = (name: string): string | null => {
   if (typeof document === 'undefined') return null

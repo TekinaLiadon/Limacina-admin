@@ -7,6 +7,7 @@
     :loading="loading"
     :error="error"
     :approving="approving"
+    :action-error="actionError"
     @go-to-page="goToPage"
     @refresh="fetchUsers"
     @approve="approveUser"
@@ -18,7 +19,7 @@ definePageMeta({
   layout: 'admin',
 })
 
-const { users, page, total, totalPages, error, loading, approving, fetchUsers, goToPage, approveUser } = useUnapprovedUsers()
+const { users, page, total, totalPages, error, actionError, loading, approving, fetchUsers, goToPage, approveUser } = useUnapprovedUsers()
 
 onMounted(fetchUsers)
 </script>
