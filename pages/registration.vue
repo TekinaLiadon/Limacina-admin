@@ -23,7 +23,7 @@ const error = ref('')
 const success = ref('')
 const pending = ref(false)
 
-const handleRegister = async (username: string, password: string, token: string) => {
+const handleRegister = async (username: string, password: string, token: string): Promise<void> => {
   error.value = ''
   success.value = ''
   pending.value = true
@@ -32,8 +32,8 @@ const handleRegister = async (username: string, password: string, token: string)
     await register(username, password, token)
     success.value = 'Владелец создан. Через несколько секунд вы будете перенаправлены на страницу входа.'
     setTimeout(() => navigateTo('/login'), 2000)
-  } catch (e) {
-    error.value = fetchErrorMessage(e) || 'Ошибка регистрации'
+  } catch (failure) {
+    error.value = fetchErrorMessage(failure) || 'Ошибка регистрации'
   } finally {
     pending.value = false
   }

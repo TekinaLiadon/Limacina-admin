@@ -3,14 +3,40 @@ import { ApiEndpoint } from '~/api/endpoints'
 import type { LogPage } from '~/api/types'
 import { debounce } from '~/utils/debounce'
 
-const LEVELS = ['10', '20', '30', '40', '50', '60']
-const LIMITS = [100, 250, 500, 1000]
+const LEVELS = new Set(['10', '20', '30', '40', '50', '60'])
+const LIMITS = new Set([100, 250, 500, 1000])
 const DEFAULT_LIMIT = 100
 const FILTER_DEBOUNCE_MS = 400
 
-const queryString = (value: unknown) => (typeof value === 'string' ? value : '')
+const queryString = (value: unknown): string => (typeof value === 'string' ? value : '')
 
-export const useLogs = () => {
+interface LogsState {
+  dates: Ref<string[]>
+  selectedDate: Ref<string>
+  parsedLines: Ref<LogEntry[]>
+  offset: Ref<number>
+  limit: Ref<number>
+  total: Ref<number>
+  currentPage: ComputedRef<number>
+  totalPages: ComputedRef<number>
+  loading: Ref<boolean>
+  error: Ref<string>
+  levelFilter: Ref<string>
+  urlFilter: Ref<string>
+  ipFilter: Ref<string>
+  statusCode: Ref<string>
+  expandedRow: Ref<number | null>
+  toggleRow: (index: number) => void
+  fetchDates: () => Promise<void>
+  fetchLogs: () => Promise<void>
+  onDateChange: () => void
+  onLimitChange: () => void
+  prevPage: () => void
+  nextPage: () => void
+  goToPage: (page: number) => void
+}
+
+export const useLogs = (): LogsState => {
   const { get } = useApi()
   const route = useRoute()
   const router = useRouter()
@@ -31,13 +57,13 @@ export const useLogs = () => {
   const expandedRow = ref<number | null>(null)
 
   const queryLevel = queryString(route.query.level)
-  if (LEVELS.includes(queryLevel)) levelFilter.value = queryLevel
+  if (LEVELS.has(queryLevel)) levelFilter.value = queryLevel
 
   const queryLimit = Number(queryString(route.query.limit))
-  if (LIMITS.includes(queryLimit)) limit.value = queryLimit
+  if (LIMITS.has(queryLimit)) limit.value = queryLimit
 
   const queryStatus = queryString(route.query.status)
-  if (/^\d{3}$/.test(queryStatus)) statusCode.value = queryStatus
+  if (/^\d{3}$/u.test(queryStatus)) statusCode.value = queryStatus
 
   const queryUrl = queryString(route.query.url)
   if (queryUrl) urlFilter.value = queryUrl
@@ -51,20 +77,20 @@ export const useLogs = () => {
     offset.value = (queryPage - 1) * limit.value
   }
 
-  const toggleRow = (i: number) => {
-    expandedRow.value = expandedRow.value === i ? null : i
+  const toggleRow = (index: number): void => {
+    expandedRow.value = expandedRow.value === index ? null : index
   }
 
-  const applyLevelFilter = () => {
+  const applyLevelFilter = (): void => {
     let entries = parseLines(rawLines.value)
     if (levelFilter.value) {
-      entries = entries.filter((e) => e.level === Number(levelFilter.value))
+      entries = entries.filter((entry) => entry.level === Number(levelFilter.value))
     }
     parsedLines.value = entries
     expandedRow.value = null
   }
 
-  const fetchLogs = async () => {
+  const fetchLogs = async (): Promise<void> => {
     if (!selectedDate.value) return
     loading.value = true
     error.value = ''
@@ -92,7 +118,7 @@ export const useLogs = () => {
     }
   }
 
-  const fetchDates = async () => {
+  const fetchDates = async (): Promise<void> => {
     loading.value = true
     error.value = ''
 
@@ -112,12 +138,12 @@ export const useLogs = () => {
     }
   }
 
-  const onDateChange = () => {
+  const onDateChange = (): void => {
     offset.value = 0
     fetchLogs()
   }
 
-  const onLimitChange = () => {
+  const onLimitChange = (): void => {
     offset.value = 0
     fetchLogs()
   }
@@ -129,17 +155,17 @@ export const useLogs = () => {
 
   onScopeDispose(applyFilters.cancel)
 
-  const prevPage = () => {
+  const prevPage = (): void => {
     offset.value = Math.max(0, offset.value - limit.value)
     fetchLogs()
   }
 
-  const nextPage = () => {
+  const nextPage = (): void => {
     offset.value += limit.value
     fetchLogs()
   }
 
-  const goToPage = (page: number) => {
+  const goToPage = (page: number): void => {
     offset.value = (page - 1) * limit.value
     fetchLogs()
   }
@@ -147,7 +173,7 @@ export const useLogs = () => {
   const currentPage = computed(() => Math.floor(offset.value / limit.value) + 1)
   const totalPages = computed(() => Math.ceil(total.value / limit.value))
 
-  const syncQuery = () => {
+  const syncQuery = (): void => {
     const query: Record<string, string> = {}
     if (selectedDate.value) query.date = selectedDate.value
     if (levelFilter.value) query.level = levelFilter.value

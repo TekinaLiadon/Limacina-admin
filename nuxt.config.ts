@@ -31,7 +31,7 @@ export default defineNuxtConfig({
   hooks: {
     'vite:extendConfig'(config, { isClient }) {
       if (!isClient) return
-      type ViteEnvironments = { environments?: Record<string, object> }
+      interface ViteEnvironments { environments?: Record<string, object> }
       const mutable = config as unknown as ViteEnvironments
       if (!mutable.environments) mutable.environments = {}
       if (!mutable.environments.ssr) {

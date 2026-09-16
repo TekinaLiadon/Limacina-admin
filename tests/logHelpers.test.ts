@@ -112,9 +112,9 @@ describe('formatDateTime', () => {
 
 describe('formatJson', () => {
   it('pretty-prints objects', () => {
-    const result = formatJson({ a: 1, b: 'two' })
-    expect(result).toContain('"a": 1')
-    expect(result).toContain('"b": "two"')
+    const result = formatJson({ alpha: 1, beta: 'two' })
+    expect(result).toContain('"alpha": 1')
+    expect(result).toContain('"beta": "two"')
     expect(result).toContain('\n')
   })
 
@@ -129,12 +129,12 @@ describe('formatJson', () => {
 
 describe('reqHeaderPairs', () => {
   it('returns empty array when no headers', () => {
-    expect(reqHeaderPairs({ level: 30, time: 0 })).toEqual([])
+    expect(reqHeaderPairs({ level: 30, time: 0 })).toStrictEqual([])
   })
 
   it('returns empty array for empty headers', () => {
     const entry: LogEntry = { level: 30, time: 0, req: { headers: {} } }
-    expect(reqHeaderPairs(entry)).toEqual([])
+    expect(reqHeaderPairs(entry)).toStrictEqual([])
   })
 
   it('filters out host, connection, accept-encoding, cache-control', () => {
@@ -152,7 +152,7 @@ describe('reqHeaderPairs', () => {
         },
       },
     }
-    const names = reqHeaderPairs(entry).map((h) => h.name)
+    const names = reqHeaderPairs(entry).map((header) => header.name)
     expect(names).not.toContain('host')
     expect(names).not.toContain('connection')
     expect(names).not.toContain('accept-encoding')
@@ -174,9 +174,9 @@ describe('reqHeaderPairs', () => {
       },
     }
     const pairs = reqHeaderPairs(entry)
-    expect(pairs.find((h) => h.name === 'authorization')?.value).toBe('***')
-    expect(pairs.find((h) => h.name === 'cookie')?.value).toBe('***')
-    expect(pairs.find((h) => h.name === 'content-type')?.value).toBe('application/json')
+    expect(pairs.find((header) => header.name === 'authorization')?.value).toBe('***')
+    expect(pairs.find((header) => header.name === 'cookie')?.value).toBe('***')
+    expect(pairs.find((header) => header.name === 'content-type')?.value).toBe('application/json')
   })
 
   it('sorts headers by name', () => {
@@ -191,18 +191,18 @@ describe('reqHeaderPairs', () => {
         },
       },
     }
-    expect(reqHeaderPairs(entry).map((h) => h.name)).toEqual(['accept', 'content-type', 'user-agent'])
+    expect(reqHeaderPairs(entry).map((header) => header.name)).toStrictEqual(['accept', 'content-type', 'user-agent'])
   })
 })
 
 describe('resHeaderPairs', () => {
   it('returns empty array when no res', () => {
-    expect(resHeaderPairs({ level: 30, time: 0 })).toEqual([])
+    expect(resHeaderPairs({ level: 30, time: 0 })).toStrictEqual([])
   })
 
   it('returns empty array for empty headers', () => {
     const entry: LogEntry = { level: 30, time: 0, res: { headers: {} } }
-    expect(resHeaderPairs(entry)).toEqual([])
+    expect(resHeaderPairs(entry)).toStrictEqual([])
   })
 
   it('masks set-cookie values', () => {
@@ -218,8 +218,8 @@ describe('resHeaderPairs', () => {
       },
     }
     const pairs = resHeaderPairs(entry)
-    expect(pairs.find((h) => h.name === 'set-cookie')?.value).toBe('***')
-    expect(pairs.find((h) => h.name === 'content-type')?.value).toBe('application/json')
+    expect(pairs.find((header) => header.name === 'set-cookie')?.value).toBe('***')
+    expect(pairs.find((header) => header.name === 'content-type')?.value).toBe('application/json')
   })
 })
 
@@ -247,6 +247,6 @@ describe('parseLines', () => {
   })
 
   it('returns empty array for empty input', () => {
-    expect(parseLines([])).toEqual([])
+    expect(parseLines([])).toStrictEqual([])
   })
 })

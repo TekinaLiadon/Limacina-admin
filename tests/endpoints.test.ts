@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { ApiEndpoint, endpointUrl } from '~/api/endpoints'
 
-describe('ApiEndpoint', () => {
+describe('apiEndpoint', () => {
   it('has unique paths', () => {
     const paths = Object.values(ApiEndpoint)
     expect(new Set(paths).size).toBe(paths.length)
@@ -9,14 +9,19 @@ describe('ApiEndpoint', () => {
 
   it('all endpoints are under /v1', () => {
     for (const path of Object.values(ApiEndpoint)) {
-      expect(path.startsWith('/v1/')).toBe(true)
+      expect(path.startsWith('/v1/')).toBeTruthy()
     }
   })
 
   it('template endpoints declare path params', () => {
     expect(ApiEndpoint.AdminUser).toBe('/v1/panel/users/:username')
     expect(ApiEndpoint.AdminUserRestore).toBe('/v1/panel/users/:username/restore')
-    expect(ApiEndpoint.LauncherDownload).toBe('/v1/launcher/update/:os/:arch/download')
+  })
+
+  it('exposes updater release endpoints', () => {
+    expect(ApiEndpoint.AdminLauncherRelease).toBe('/v1/panel/launcher/release')
+    expect(ApiEndpoint.LauncherLatest).toBe('/v1/launcher/update/latest')
+    expect(ApiEndpoint.LauncherReleases).toBe('/v1/launcher/update/releases')
   })
 })
 
@@ -27,11 +32,6 @@ describe('endpointUrl', () => {
 
   it('substitutes params in the restore endpoint', () => {
     expect(endpointUrl(ApiEndpoint.AdminUserRestore, { username: 'john' })).toBe('/v1/panel/users/john/restore')
-  })
-
-  it('substitutes multiple path params', () => {
-    expect(endpointUrl(ApiEndpoint.LauncherDownload, { os: 'linux', arch: 'x86_64' }))
-      .toBe('/v1/launcher/update/linux/x86_64/download')
   })
 
   it('encodes path param values', () => {

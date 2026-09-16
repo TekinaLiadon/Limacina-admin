@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { debounce } from '~/utils/debounce'
 
-afterEach(() => {
-  vi.useRealTimers()
-})
-
 describe('debounce', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   it('invokes once for a burst of calls', () => {
     vi.useFakeTimers()
-    const fn = vi.fn()
+    const fn = vi.fn<(...args: unknown[]) => void>()
     const debounced = debounce(fn, 400)
 
     debounced()
@@ -21,7 +21,7 @@ describe('debounce', () => {
 
   it('delays invocation until the pause after the last call', () => {
     vi.useFakeTimers()
-    const fn = vi.fn()
+    const fn = vi.fn<(...args: unknown[]) => void>()
     const debounced = debounce(fn, 400)
 
     debounced()
@@ -38,7 +38,7 @@ describe('debounce', () => {
 
   it('passes arguments through', () => {
     vi.useFakeTimers()
-    const fn = vi.fn()
+    const fn = vi.fn<(...args: unknown[]) => void>()
     const debounced = debounce(fn, 400)
 
     debounced('a', 1)
@@ -49,7 +49,7 @@ describe('debounce', () => {
 
   it('cancels a pending invocation', () => {
     vi.useFakeTimers()
-    const fn = vi.fn()
+    const fn = vi.fn<(...args: unknown[]) => void>()
     const debounced = debounce(fn, 400)
 
     debounced()

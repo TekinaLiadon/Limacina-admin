@@ -8,7 +8,7 @@ export const pageNumbers = (currentPage: number, totalPages: number): (number | 
   const pages: (number | string)[] = []
 
   if (totalPages <= 7) {
-    for (let i = 1; i <= totalPages; i++) pages.push(i)
+    for (let page = 1; page <= totalPages; page += 1) pages.push(page)
     return pages
   }
 
@@ -19,7 +19,7 @@ export const pageNumbers = (currentPage: number, totalPages: number): (number | 
   const start = Math.max(2, currentPage - 1)
   const end = Math.min(totalPages - 1, currentPage + 1)
 
-  for (let i = start; i <= end; i++) pages.push(i)
+  for (let page = start; page <= end; page += 1) pages.push(page)
 
   if (currentPage < totalPages - 2) pages.push('...')
 
@@ -28,5 +28,5 @@ export const pageNumbers = (currentPage: number, totalPages: number): (number | 
   return pages
 }
 
-export const slicePage = <T>(items: T[], page: number, perPage: number): T[] =>
+export const slicePage = <TItem>(items: TItem[], page: number, perPage: number): TItem[] =>
   items.slice((page - 1) * perPage, page * perPage)

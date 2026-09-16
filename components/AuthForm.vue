@@ -71,7 +71,7 @@ const username = ref('')
 const password = ref('')
 const token = ref('')
 
-const onSubmit = () => {
+const onSubmit = (): void => {
   emit('submit', username.value, password.value, token.value)
 }
 </script>

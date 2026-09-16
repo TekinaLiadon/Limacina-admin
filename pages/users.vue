@@ -36,7 +36,7 @@ const { users, page, search, total, totalPages, loading, error, acting, actionEr
 const showConfirm = ref(false)
 const deleteTarget = ref('')
 
-const askDelete = (user: { username: string }) => {
+const askDelete = (user: { username: string }): void => {
   deleteTarget.value = user.username
   showConfirm.value = true
 }

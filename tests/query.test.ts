@@ -4,7 +4,7 @@ import { buildQuery } from '~/api/query'
 describe('buildQuery', () => {
   it('returns empty string for undefined query', () => {
     expect(buildQuery()).toBe('')
-    expect(buildQuery(undefined)).toBe('')
+    expect(buildQuery()).toBe('')
   })
 
   it('returns empty string for empty object', () => {
@@ -21,7 +21,7 @@ describe('buildQuery', () => {
   })
 
   it('skips null, undefined and empty string values', () => {
-    expect(buildQuery({ a: null, b: undefined, c: '', d: 'x' })).toBe('?d=x')
+    expect(buildQuery({ first: null, second: undefined, third: '', fourth: 'x' })).toBe('?fourth=x')
   })
 
   it('serializes booleans', () => {
@@ -29,6 +29,6 @@ describe('buildQuery', () => {
   })
 
   it('encodes special characters', () => {
-    expect(buildQuery({ q: 'a&b=c' })).toBe('?q=a%26b%3Dc')
+    expect(buildQuery({ query: 'a&b=c' })).toBe('?query=a%26b%3Dc')
   })
 })

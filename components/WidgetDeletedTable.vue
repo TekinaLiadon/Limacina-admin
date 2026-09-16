@@ -109,7 +109,7 @@ defineEmits<{
 
 const columns = ['Имя пользователя', 'Роль', 'Одобрение', 'Бан', 'Дата удаления', '']
 
-const userKey = (user: DeletedUserListItem) => user.username
+const userKey = (user: DeletedUserListItem): string => user.username
 </script>
 
 <style lang="scss" scoped>

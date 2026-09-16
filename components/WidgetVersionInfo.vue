@@ -1,43 +1,43 @@
 <template>
   <div class="card">
-    <h2 class="widget-title">Текущая версия</h2>
-    <div v-if="version" class="version-info">
+    <h2 class="widget-title">Актуальный релиз (latest.json)</h2>
+    <div v-if="latest" class="version-info">
       <div class="version-row">
         <span class="config-label">Версия</span>
-        <span>{{ version.version }}</span>
+        <span>{{ latest.version }}</span>
+      </div>
+      <div class="version-row">
+        <span class="config-label">Опубликовано</span>
+        <span class="pub-date">{{ formatDate(latest.pub_date) }}</span>
       </div>
       <div class="version-platforms">
         <a
-          v-for="p in version.platforms"
-          :key="`${p.os}-${p.arch}`"
-          :href="downloadUrl(p.os, p.arch)"
+          v-for="(release, key) in latest.platforms"
+          :key="key"
+          :href="release.url"
           class="version-platform-card"
           target="_blank"
+          rel="noopener"
         >
-          <span class="platform-label">{{ capitalize(p.os) }} {{ p.arch }}</span>
+          <span class="platform-label">{{ updaterPlatformLabel(key) }}</span>
           <span class="platform-download">Скачать</span>
         </a>
       </div>
     </div>
     <div v-else class="empty-state">
-      <p>Не удалось загрузить информацию о версии</p>
+      <p>Нет опубликованных релизов</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ApiEndpoint, endpointUrl } from '~/api/endpoints'
-import type { LauncherVersion } from '~/api/types'
-import { capitalize } from '~/utils/format'
+import type { UpdaterLatest } from '~/api/types'
+import { updaterPlatformLabel } from '~/utils/updaterPlatforms'
+import { formatDate } from '~/utils/format'
 
 defineProps<{
-  version: LauncherVersion | null
+  latest: UpdaterLatest | null
 }>()
-
-const config = useRuntimeConfig()
-
-const downloadUrl = (os: string, arch: string) =>
-  `${config.public.apiBase}${endpointUrl(ApiEndpoint.LauncherDownload, { os, arch })}`
 </script>
 
 <style lang="scss" scoped>
@@ -67,6 +67,12 @@ const downloadUrl = (os: string, arch: string) =>
   font-family: var(--font-mono);
   font-size: 0.875rem;
   color: var(--primary);
+}
+
+.pub-date {
+  color: var(--text) !important;
+  font-size: 0.6875rem !important;
+  letter-spacing: 0.053em;
 }
 
 .version-platforms {

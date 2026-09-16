@@ -16,17 +16,17 @@ export interface InitOwnerRequest {
   password: string
 }
 
-export interface Page<T> {
-  items: T[]
+export interface Page<TItem> {
+  items: TItem[]
   total: number
   limit: number
   offset: number
 }
 
-export const isPage = <T>(value: unknown): value is Page<T> =>
+export const isPage = <TItem>(value: unknown): value is Page<TItem> =>
   typeof value === 'object' && value !== null &&
-  Array.isArray((value as Page<T>).items) &&
-  typeof (value as Page<T>).total === 'number'
+  Array.isArray((value as Page<TItem>).items) &&
+  typeof (value as Page<TItem>).total === 'number'
 
 export const PAGE_FORMAT_ERROR = 'API вернул некорректные данные'
 
@@ -54,20 +54,36 @@ export interface LogPage {
   lines: string[]
 }
 
-export interface LauncherPlatform {
-  os: string
-  arch: string
+export interface UpdaterPlatformRelease {
+  url: string
+  signature: string
 }
 
-export interface LauncherVersionInfo {
+export interface UpdaterLatest {
   version: string
-  platforms: LauncherPlatform[]
+  pub_date: string
+  platforms: Record<string, UpdaterPlatformRelease>
 }
 
-export interface LauncherVersion {
+export interface UpdaterReleaseInfo {
   version: string
-  platforms: LauncherPlatform[]
-  versions: LauncherVersionInfo[]
+  pubDate: string
+  platforms: string[]
+}
+
+export interface UpdaterReleasesList {
+  releases: UpdaterReleaseInfo[]
+}
+
+export const isUpdaterReleasesList = (value: unknown): value is UpdaterReleasesList =>
+  typeof value === 'object' && value !== null &&
+  Array.isArray((value as UpdaterReleasesList).releases)
+
+export const UPDATER_FORMAT_ERROR = 'API вернул некорректные данные'
+
+export interface LauncherReleasePublished {
+  version: string
+  published: string[]
 }
 
 export interface RebuildStatus {

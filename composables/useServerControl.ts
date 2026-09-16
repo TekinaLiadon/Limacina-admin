@@ -5,7 +5,17 @@ import type { RebuildStatus } from '~/api/types'
 const POLL_INTERVAL_MS = 2000
 const MAX_POLL_FAILURES = 3
 
-export const useServerControl = () => {
+interface ServerControlState {
+  restarting: Ref<boolean>
+  polling: Ref<boolean>
+  restartMode: Ref<'restart' | 'rebuild'>
+  error: Ref<string>
+  restarted: Ref<boolean>
+  rebuildStatus: Ref<RebuildStatus | null>
+  restartServer: (rebuild?: boolean) => Promise<void>
+}
+
+export const useServerControl = (): ServerControlState => {
   const { post, get } = useApi()
 
   const restarting = ref(false)
@@ -15,17 +25,17 @@ export const useServerControl = () => {
   const restarted = ref(false)
   const rebuildStatus = ref<RebuildStatus | null>(null)
 
-  let pollTimer: ReturnType<typeof setTimeout> | undefined
+  let pollTimer: ReturnType<typeof setTimeout> | undefined = undefined
   let pollFailures = 0
 
-  const stopPolling = () => {
+  const stopPolling = (): void => {
     clearTimeout(pollTimer)
     polling.value = false
   }
 
   onScopeDispose(stopPolling)
 
-  const pollRebuild = async () => {
+  const pollRebuild = async (): Promise<void> => {
     const { data, error: err, cause } = await get<RebuildStatus>(ApiEndpoint.ServerRebuildStatus)
 
     if (err.value) {
@@ -57,7 +67,7 @@ export const useServerControl = () => {
     pollTimer = setTimeout(pollRebuild, POLL_INTERVAL_MS)
   }
 
-  const startPolling = () => {
+  const startPolling = (): void => {
     clearTimeout(pollTimer)
     pollFailures = 0
     rebuildStatus.value = null
@@ -65,7 +75,7 @@ export const useServerControl = () => {
     pollTimer = setTimeout(pollRebuild, POLL_INTERVAL_MS)
   }
 
-  const restartServer = async (rebuild = false) => {
+  const restartServer = async (rebuild = false): Promise<void> => {
     stopPolling()
     restarting.value = true
     restartMode.value = rebuild ? 'rebuild' : 'restart'

@@ -23,11 +23,11 @@ const emit = defineEmits<{
   confirm: []
 }>()
 
-const cancel = () => {
+const cancel = (): void => {
   emit('update:modelValue', false)
 }
 
-const confirm = () => {
+const confirm = (): void => {
   emit('confirm')
   emit('update:modelValue', false)
 }

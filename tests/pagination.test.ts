@@ -35,31 +35,31 @@ describe('clampPage', () => {
 
 describe('pageNumbers', () => {
   it('lists all pages when total is small', () => {
-    expect(pageNumbers(1, 5)).toEqual([1, 2, 3, 4, 5])
+    expect(pageNumbers(1, 5)).toStrictEqual([1, 2, 3, 4, 5])
   })
 
   it('collapses middle pages with ellipsis', () => {
-    expect(pageNumbers(5, 20)).toEqual([1, '...', 4, 5, 6, '...', 20])
+    expect(pageNumbers(5, 20)).toStrictEqual([1, '...', 4, 5, 6, '...', 20])
   })
 
   it('keeps leading pages when current is near start', () => {
-    expect(pageNumbers(2, 20)).toEqual([1, 2, 3, '...', 20])
+    expect(pageNumbers(2, 20)).toStrictEqual([1, 2, 3, '...', 20])
   })
 
   it('keeps trailing pages when current is near end', () => {
-    expect(pageNumbers(19, 20)).toEqual([1, '...', 18, 19, 20])
+    expect(pageNumbers(19, 20)).toStrictEqual([1, '...', 18, 19, 20])
   })
 })
 
 describe('slicePage', () => {
   it('slices the requested page', () => {
     const items = [1, 2, 3, 4, 5]
-    expect(slicePage(items, 1, 2)).toEqual([1, 2])
-    expect(slicePage(items, 2, 2)).toEqual([3, 4])
-    expect(slicePage(items, 3, 2)).toEqual([5])
+    expect(slicePage(items, 1, 2)).toStrictEqual([1, 2])
+    expect(slicePage(items, 2, 2)).toStrictEqual([3, 4])
+    expect(slicePage(items, 3, 2)).toStrictEqual([5])
   })
 
   it('returns empty slice beyond the end', () => {
-    expect(slicePage([1, 2], 5, 2)).toEqual([])
+    expect(slicePage([1, 2], 5, 2)).toStrictEqual([])
   })
 })

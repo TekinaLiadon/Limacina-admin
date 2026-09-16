@@ -1,6 +1,15 @@
 import { ApiEndpoint } from '~/api/endpoints'
 
-export const useSetOwner = () => {
+interface SetOwnerState {
+  username: Ref<string>
+  granting: Ref<boolean>
+  error: Ref<string>
+  granted: Ref<boolean>
+  valid: ComputedRef<boolean>
+  setOwner: () => Promise<void>
+}
+
+export const useSetOwner = (): SetOwnerState => {
   const { patch } = useApi()
 
   const username = ref('')
@@ -10,7 +19,7 @@ export const useSetOwner = () => {
 
   const valid = computed(() => username.value.trim() !== '')
 
-  const setOwner = async () => {
+  const setOwner = async (): Promise<void> => {
     if (!valid.value || granting.value) return
 
     granting.value = true

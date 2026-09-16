@@ -1,23 +1,25 @@
 <template>
   <div class="platform-card" :class="{ 'has-file': modelValue !== null }">
     <div class="platform-header">
-      <span class="platform-name">{{ os }} {{ arch }}</span>
-      <span class="platform-ext">.zip</span>
+      <span class="platform-name">{{ title }}</span>
+      <span class="platform-ext">{{ ext }}</span>
     </div>
     <label class="file-upload-btn" :class="{ 'has-file': modelValue !== null }">
-      <input type="file" accept=".zip" hidden @change="onChange" />
+      <input type="file" :accept="accept" hidden @change="onChange" />
       {{ modelValue ? 'Файл выбран' : 'Выберите файл' }}
     </label>
     <span class="file-name" :class="{ 'has-file': modelValue !== null }">
       {{ modelValue ? modelValue.name : 'Файл не выбран' }}
     </span>
+    <span v-if="error" class="file-error">{{ error }}</span>
   </div>
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  os: string
-  arch: string
+const props = defineProps<{
+  title: string
+  ext: string
+  accept: string
   modelValue: File | null
 }>()
 
@@ -25,8 +27,27 @@ const emit = defineEmits<{
   'update:modelValue': [file: File | null]
 }>()
 
-const onChange = (e: Event) => {
-  const file = (e.target as HTMLInputElement).files?.[0] || null
+const accepted = computed(() =>
+  props.accept.split(',').map((part) => part.trim().toLowerCase()).filter(Boolean),
+)
+
+const error = ref('')
+
+watch(() => props.modelValue, (value) => {
+  if (value === null) error.value = ''
+})
+
+const onChange = (e: Event): void => {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0] || null
+  input.value = ''
+
+  if (file && !accepted.value.some((ext) => file.name.toLowerCase().endsWith(ext))) {
+    error.value = `Нужен файл: ${props.accept}`
+    return
+  }
+
+  error.value = ''
   emit('update:modelValue', file)
 }
 </script>
@@ -105,5 +126,13 @@ const onChange = (e: Event) => {
   &.has-file {
     color: var(--text);
   }
+}
+
+.file-error {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.053em;
+  color: var(--danger);
+  line-height: 1.4;
 }
 </style>

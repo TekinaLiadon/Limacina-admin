@@ -4,7 +4,7 @@ import { formatDate, capitalize } from '../utils/format'
 describe('formatDate', () => {
   it('returns dash for undefined date', () => {
     expect(formatDate()).toBe('—')
-    expect(formatDate(undefined)).toBe('—')
+    expect(formatDate()).toBe('—')
     expect(formatDate('')).toBe('—')
   })
 

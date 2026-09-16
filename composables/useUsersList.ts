@@ -1,4 +1,4 @@
-import { ApiEndpoint } from '~/api/endpoints'
+import type { ApiEndpoint } from '~/api/endpoints'
 import { isPage, PAGE_FORMAT_ERROR, type Page } from '~/api/types'
 import type { QueryParams } from '~/api/query'
 import { clampPage, totalPagesOf } from '~/utils/pagination'
@@ -13,10 +13,30 @@ interface UsersListOptions {
   query?: () => QueryParams
 }
 
-export const useUsersList = <T>({ endpoint, perPage, withSearch = false, query }: UsersListOptions) => {
+interface UsersListState<TItem> {
+  users: Ref<TItem[]>
+  page: Ref<number>
+  search: Ref<string>
+  total: Ref<number>
+  totalPages: ComputedRef<number>
+  loading: Ref<boolean>
+  error: Ref<string>
+  actionError: Ref<string>
+  fetchUsers: () => Promise<void>
+  goToPage: (target: number) => void
+  refetchAfterRemoval: () => Promise<void>
+  runUserAction: (
+    username: string,
+    busy: Ref<string>,
+    act: () => Promise<{ error: Ref<string | null> }>,
+    onSuccess?: () => Promise<void> | void,
+  ) => Promise<void>
+}
+
+export const useUsersList = <TItem>({ endpoint, perPage, withSearch = false, query }: UsersListOptions): UsersListState<TItem> => {
   const { get } = useApi()
 
-  const users = ref<T[]>([])
+  const users = ref<TItem[]>([]) as Ref<TItem[]>
   const page = ref(1)
   const search = ref('')
   const total = ref(0)
@@ -26,12 +46,12 @@ export const useUsersList = <T>({ endpoint, perPage, withSearch = false, query }
 
   const totalPages = computed(() => totalPagesOf(total.value, perPage))
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (): Promise<void> => {
     loading.value = true
     error.value = ''
 
     try {
-      const { data, error: err } = await get<Page<T>>(endpoint, {
+      const { data, error: err } = await get<Page<TItem>>(endpoint, {
         limit: perPage,
         offset: (page.value - 1) * perPage,
         username: withSearch ? search.value.trim() || undefined : undefined,
@@ -40,7 +60,7 @@ export const useUsersList = <T>({ endpoint, perPage, withSearch = false, query }
 
       if (err.value) {
         error.value = err.value
-      } else if (isPage<T>(data.value)) {
+      } else if (isPage<TItem>(data.value)) {
         users.value = data.value.items
         total.value = data.value.total
         page.value = clampPage(page.value, totalPages.value)
@@ -52,7 +72,7 @@ export const useUsersList = <T>({ endpoint, perPage, withSearch = false, query }
     }
   }
 
-  const goToPage = (target: number) => {
+  const goToPage = (target: number): void => {
     const next = clampPage(target, totalPages.value)
     if (next === page.value) return
     page.value = next
@@ -67,7 +87,7 @@ export const useUsersList = <T>({ endpoint, perPage, withSearch = false, query }
   if (withSearch) watch(search, () => applySearch())
   onScopeDispose(applySearch.cancel)
 
-  const refetchAfterRemoval = async () => {
+  const refetchAfterRemoval = async (): Promise<void> => {
     if (users.value.length === 1 && page.value > 1) page.value -= 1
     await fetchUsers()
   }
@@ -77,7 +97,7 @@ export const useUsersList = <T>({ endpoint, perPage, withSearch = false, query }
     busy: Ref<string>,
     act: () => Promise<{ error: Ref<string | null> }>,
     onSuccess?: () => Promise<void> | void,
-  ) => {
+  ): Promise<void> => {
     busy.value = username
     actionError.value = ''
 

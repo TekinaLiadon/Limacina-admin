@@ -5,11 +5,17 @@ import {
 import { ApiEndpoint } from '~/api/endpoints'
 import type { AuthResponse, InitOwnerRequest } from '~/api/types'
 
-export const useAuth = () => {
+interface AuthApi {
+  login: (username: string, password: string) => Promise<void>
+  register: (username: string, password: string, token: string) => Promise<void>
+  logout: () => void
+}
+
+export const useAuth = (): AuthApi => {
   const config = useRuntimeConfig()
   const { invalidateSession } = useApi()
 
-  const login = async (username: string, password: string) => {
+  const login = async (username: string, password: string): Promise<void> => {
     const res = await $fetch<AuthResponse>(`${config.public.apiBase}${ApiEndpoint.AuthLogin}`, {
       method: 'POST',
       body: { username, password },
@@ -26,7 +32,7 @@ export const useAuth = () => {
     navigateTo('/unapproved')
   }
 
-  const register = async (username: string, password: string, token: string) => {
+  const register = async (username: string, password: string, token: string): Promise<void> => {
     const body: InitOwnerRequest = { token, username, password }
     await $fetch(`${config.public.apiBase}${ApiEndpoint.InitOwner}`, {
       method: 'POST',
@@ -34,7 +40,7 @@ export const useAuth = () => {
     })
   }
 
-  const logout = () => {
+  const logout = (): void => {
     invalidateSession()
     clearAuthCookies()
     navigateTo('/login')

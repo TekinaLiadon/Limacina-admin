@@ -1,20 +1,20 @@
-export interface DebouncedFunction<A extends unknown[]> {
-  (...args: A): void
+export interface DebouncedFunction<TArgs extends unknown[]> {
+  (...args: TArgs): void
   cancel: () => void
 }
 
-export const debounce = <A extends unknown[]>(
-  fn: (...args: A) => void,
+export const debounce = <TArgs extends unknown[]>(
+  fn: (...args: TArgs) => void,
   delay: number,
-): DebouncedFunction<A> => {
-  let timer: ReturnType<typeof setTimeout> | undefined
+): DebouncedFunction<TArgs> => {
+  let timer: ReturnType<typeof setTimeout> | undefined = undefined
 
-  const debounced = (...args: A) => {
+  const debounced = (...args: TArgs): void => {
     clearTimeout(timer)
     timer = setTimeout(() => fn(...args), delay)
   }
 
-  debounced.cancel = () => {
+  debounced.cancel = (): void => {
     clearTimeout(timer)
   }
 

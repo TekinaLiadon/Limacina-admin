@@ -13,7 +13,6 @@ export const navItems: NavItem[] = [
   { path: '/logs', label: 'Логи' },
   { path: '/deleted', label: 'Удалённые', ownerOnly: true },
   { path: '/server', label: 'Сервер', ownerOnly: true },
-  { path: '/account', label: 'Аккаунт' },
 ]
 
 export const navTitles: Record<string, string> = {
@@ -24,5 +23,4 @@ export const navTitles: Record<string, string> = {
   '/logs': 'Логи',
   '/deleted': 'Удалённые пользователи',
   '/server': 'Сервер',
-  '/account': 'Аккаунт',
 }

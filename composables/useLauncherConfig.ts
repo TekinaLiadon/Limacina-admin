@@ -26,7 +26,20 @@ const defaultConfig = (): LauncherConfigForm => ({
   jvmArgs: '',
 })
 
-export const useLauncherConfig = () => {
+interface LauncherConfigState {
+  config: Ref<LauncherConfig | null>
+  isNew: Ref<boolean>
+  loading: Ref<boolean>
+  error: Ref<string>
+  form: LauncherConfigForm
+  saving: Ref<boolean>
+  saveError: Ref<string>
+  saveSuccess: Ref<string>
+  fetchConfig: () => Promise<void>
+  saveConfig: () => Promise<void>
+}
+
+export const useLauncherConfig = (): LauncherConfigState => {
   const { get, patch } = useApi()
 
   const config = ref<LauncherConfig | null>(null)
@@ -39,7 +52,7 @@ export const useLauncherConfig = () => {
   const saveError = ref('')
   const saveSuccess = ref('')
 
-  const fetchConfig = async () => {
+  const fetchConfig = async (): Promise<void> => {
     loading.value = true
     error.value = ''
 
@@ -70,7 +83,7 @@ export const useLauncherConfig = () => {
     }
   }
 
-  const saveConfig = async () => {
+  const saveConfig = async (): Promise<void> => {
     saving.value = true
     saveError.value = ''
     saveSuccess.value = ''
@@ -83,7 +96,7 @@ export const useLauncherConfig = () => {
       minMemory: form.minMemory,
       maxMemory: form.maxMemory,
       online: form.online,
-      jvmArgs: form.jvmArgs.split(/\s+/).filter(Boolean),
+      jvmArgs: form.jvmArgs.split(/\s+/u).filter(Boolean),
     }
 
     try {

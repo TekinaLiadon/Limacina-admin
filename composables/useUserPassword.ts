@@ -1,6 +1,16 @@
 import { ApiEndpoint } from '~/api/endpoints'
 
-export const useUserPassword = () => {
+interface UserPasswordState {
+  username: Ref<string>
+  password: Ref<string>
+  saving: Ref<boolean>
+  error: Ref<string>
+  changed: Ref<boolean>
+  valid: ComputedRef<boolean>
+  submit: () => Promise<void>
+}
+
+export const useUserPassword = (): UserPasswordState => {
   const { patch } = useApi()
 
   const username = ref('')
@@ -12,7 +22,7 @@ export const useUserPassword = () => {
   const valid = computed(() =>
     username.value.trim() !== '' && password.value.length >= 6)
 
-  const submit = async () => {
+  const submit = async (): Promise<void> => {
     if (!valid.value || saving.value) return
 
     saving.value = true

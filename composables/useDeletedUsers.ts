@@ -5,7 +5,22 @@ export type { DeletedUserListItem } from '~/api/types'
 
 export const DELETED_PER_PAGE = 10
 
-export const useDeletedUsers = () => {
+interface DeletedUsersState {
+  users: Ref<DeletedUserListItem[]>
+  page: Ref<number>
+  search: Ref<string>
+  total: Ref<number>
+  totalPages: ComputedRef<number>
+  loading: Ref<boolean>
+  error: Ref<string>
+  restoring: Ref<string>
+  actionError: Ref<string>
+  fetchUsers: () => Promise<void>
+  goToPage: (target: number) => void
+  restoreUser: (username: string) => Promise<void>
+}
+
+export const useDeletedUsers = (): DeletedUsersState => {
   const { patch } = useApi()
 
   const {
@@ -19,7 +34,7 @@ export const useDeletedUsers = () => {
 
   const restoring = ref('')
 
-  const restoreUser = (username: string) =>
+  const restoreUser = (username: string): Promise<void> =>
     runUserAction(
       username,
       restoring,

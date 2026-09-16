@@ -1,14 +1,22 @@
 <template>
   <div>
     <AppDataState :loading="isLoading" :error="pageError">
-      <WidgetVersionInfo :version="version" />
+      <WidgetVersionInfo :latest="latest" />
 
-      <WidgetLauncherUpload
-        :form="uploadForm"
-        :uploading="uploading"
-        :upload-error="uploadError"
-        :upload-success="uploadSuccess"
-        @upload="handleUpload"
+      <WidgetReleaseUpload
+        :form="publishForm"
+        :form-error="formError"
+        :publishing="publishing"
+        :publish-error="publishError"
+        :publish-success="publishSuccess"
+        @publish="handlePublish"
+      />
+
+      <WidgetReleaseHistory
+        :releases="releases"
+        :latest-version="latest?.version ?? ''"
+        :loading="historyLoading"
+        :error="historyError"
       />
 
       <WidgetLauncherConfig
@@ -29,27 +37,33 @@ definePageMeta({
 })
 
 const {
-  version, loading: versionLoading, error: versionError, fetchVersion,
-} = useLauncherVersion()
+  latest, loading: latestLoading, error: latestError, fetchLatest,
+} = useLauncherLatest()
+
+const {
+  releases, loading: historyLoading, error: historyError, fetchReleases,
+} = useLauncherReleases()
+
+const {
+  form: publishForm, formError, publishing, publishError, publishSuccess, publishRelease,
+} = useLauncherReleasePublish()
 
 const {
   isNew, form: configForm, loading: configLoading, error: configError,
   saving, saveError, saveSuccess, fetchConfig, saveConfig,
 } = useLauncherConfig()
 
-const {
-  form: uploadForm, uploading, uploadError, uploadSuccess,
-  uploadLauncher,
-} = useLauncherUpload()
+const isLoading = computed(() => latestLoading.value || historyLoading.value || configLoading.value)
+const pageError = computed(() => latestError.value || historyError.value || configError.value)
 
-const isLoading = computed(() => versionLoading.value || configLoading.value)
-const pageError = computed(() => versionError.value || configError.value)
-
-const handleUpload = () => {
-  uploadLauncher((v) => { version.value = v })
+const handlePublish = (): void => {
+  publishRelease(() => {
+    fetchLatest(true)
+    fetchReleases(true)
+  })
 }
 
 onMounted(async () => {
-  await Promise.all([fetchVersion(), fetchConfig()])
+  await Promise.all([fetchLatest(), fetchReleases(), fetchConfig()])
 })
 </script>

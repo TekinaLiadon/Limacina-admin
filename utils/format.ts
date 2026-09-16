@@ -7,4 +7,4 @@ export const formatDate = (date?: string): string => {
   })
 }
 
-export const capitalize = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : s
+export const capitalize = (value: string): string => value ? value.charAt(0).toUpperCase() + value.slice(1) : value

@@ -6,8 +6,9 @@ export const buildQuery = (query?: QueryParams): string => {
 
   const search = new URLSearchParams()
   for (const [key, value] of Object.entries(query)) {
-    if (value === null || value === undefined || value === '') continue
-    search.append(key, String(value))
+    if (value !== null && value !== undefined && value !== '') {
+      search.append(key, String(value))
+    }
   }
 
   const serialized = search.toString()

@@ -114,7 +114,7 @@ const restartConfirmMessage = computed(() => pendingRebuild.value
   ? 'Пересобрать бинарник и перезапустить сервер? Пересборка может занять пару минут.'
   : 'Вы уверены что хотите перезапустить сервер?')
 
-const askRestart = (rebuild: boolean) => {
+const askRestart = (rebuild: boolean): void => {
   pendingRebuild.value = rebuild
   showRestartConfirm.value = true
 }
@@ -126,7 +126,7 @@ const restartedMessage = computed(() =>
 
 const showOwnerConfirm = ref(false)
 
-const askSetOwner = () => {
+const askSetOwner = (): void => {
   if (!ownerValid.value) return
   showOwnerConfirm.value = true
 }
