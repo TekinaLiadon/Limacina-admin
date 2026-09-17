@@ -46,7 +46,11 @@ export const useUsersList = <TItem>({ endpoint, perPage, withSearch = false, que
 
   const totalPages = computed(() => totalPagesOf(total.value, perPage))
 
+  let requestCounter = 0
+
   const fetchUsers = async (): Promise<void> => {
+    requestCounter += 1
+    const requestId = requestCounter
     loading.value = true
     error.value = ''
 
@@ -58,24 +62,29 @@ export const useUsersList = <TItem>({ endpoint, perPage, withSearch = false, que
         ...query?.(),
       })
 
+      if (requestId !== requestCounter) return
+
       if (err.value) {
         error.value = err.value
       } else if (isPage<TItem>(data.value)) {
-        users.value = data.value.items
         total.value = data.value.total
-        page.value = clampPage(page.value, totalPages.value)
+        users.value = data.value.items
+
+        const clampedPage = clampPage(page.value, totalPages.value)
+        if (clampedPage !== page.value) {
+          page.value = clampedPage
+          await fetchUsers()
+        }
       } else if (data.value) {
         error.value = API_FORMAT_ERROR
       }
     } finally {
-      loading.value = false
+      if (requestId === requestCounter) loading.value = false
     }
   }
 
   const goToPage = (target: number): void => {
-    const next = clampPage(target, totalPages.value)
-    if (next === page.value) return
-    page.value = next
+    page.value = clampPage(target, totalPages.value)
     fetchUsers()
   }
 

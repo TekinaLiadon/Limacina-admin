@@ -90,8 +90,15 @@ export const useLogs = (): LogsState => {
     expandedRow.value = null
   }
 
+  let requestCounter = 0
+
+  const currentPage = computed(() => Math.floor(offset.value / limit.value) + 1)
+  const totalPages = computed(() => Math.ceil(total.value / limit.value))
+
   const fetchLogs = async (): Promise<void> => {
     if (!selectedDate.value) return
+    requestCounter += 1
+    const requestId = requestCounter
     loading.value = true
     error.value = ''
 
@@ -105,16 +112,25 @@ export const useLogs = (): LogsState => {
         ip: ipFilter.value.trim() || undefined,
       })
 
+      if (requestId !== requestCounter) return
+
       if (err.value) {
         error.value = err.value
       } else if (data.value) {
         rawLines.value = data.value.lines
         total.value = data.value.total
         offset.value = data.value.offset
+
+        const lastOffset = (totalPages.value - 1) * limit.value
+        if (total.value > 0 && offset.value > lastOffset) {
+          offset.value = Math.max(0, lastOffset)
+          await fetchLogs()
+          return
+        }
         applyLevelFilter()
       }
     } finally {
-      loading.value = false
+      if (requestId === requestCounter) loading.value = false
     }
   }
 
@@ -169,9 +185,6 @@ export const useLogs = (): LogsState => {
     offset.value = (page - 1) * limit.value
     fetchLogs()
   }
-
-  const currentPage = computed(() => Math.floor(offset.value / limit.value) + 1)
-  const totalPages = computed(() => Math.ceil(total.value / limit.value))
 
   const syncQuery = (): void => {
     const query: Record<string, string> = {}
