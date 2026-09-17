@@ -14,7 +14,7 @@
         <a
           v-for="(release, key) in latest.platforms"
           :key="key"
-          :href="release.url"
+          :href="isSafeUrl(release.url) ? release.url : undefined"
           class="version-platform-card"
           target="_blank"
           rel="noopener"
@@ -33,6 +33,7 @@
 <script setup lang="ts">
 import type { UpdaterLatest } from '~/api/types'
 import { updaterPlatformLabel } from '~/utils/updaterPlatforms'
+import { isSafeUrl } from '~/utils/url'
 import { formatDate } from '~/utils/format'
 
 defineProps<{
