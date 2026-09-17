@@ -182,59 +182,6 @@ const userKey = (user: UserListItem): string => user.username
 <style lang="scss" scoped>
 @use '~/assets/css/mixins' as *;
 
-.toolbar {
-  margin-bottom: 16px;
-}
-
-.search-group {
-  max-width: 320px;
-
-  @include mobile {
-    max-width: none;
-    width: 100%;
-  }
-}
-
-.user-card {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px;
-}
-
-.user-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.user-card-name {
-  font-size: 0.9375rem;
-  color: var(--text-bright);
-}
-
-.user-card-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.user-card-field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-
-  label {
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    letter-spacing: 0.058em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-}
-
 .user-card-delete {
   width: 100%;
 }

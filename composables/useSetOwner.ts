@@ -10,37 +10,11 @@ interface SetOwnerState {
 }
 
 export const useSetOwner = (): SetOwnerState => {
-  const { patch } = useApi()
-
-  const username = ref('')
-  const granting = ref(false)
-  const error = ref('')
-  const granted = ref(false)
-
-  const valid = computed(() => username.value.trim() !== '')
-
-  const setOwner = async (): Promise<void> => {
-    if (!valid.value || granting.value) return
-
-    granting.value = true
-    error.value = ''
-    granted.value = false
-
-    try {
-      const { error: err } = await patch(ApiEndpoint.AdminSetOwner, {
-        username: username.value.trim(),
-      })
-
-      if (err.value) {
-        error.value = err.value
-      } else {
-        granted.value = true
-        username.value = ''
-      }
-    } finally {
-      granting.value = false
-    }
-  }
+  const { username, saving: granting, error, success: granted, valid, submit: setOwner } = useUserAction({
+    endpoint: ApiEndpoint.AdminSetOwner,
+    buildBody: (name) => ({ username: name }),
+    isValid: (name) => name !== '',
+  })
 
   return { username, granting, error, granted, valid, setOwner }
 }

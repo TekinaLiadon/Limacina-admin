@@ -304,5 +304,22 @@ describe('useApi', () => {
       const refreshCalls = fetchMock.mock.calls.filter((call) => call[0] === `${API}/v1/common/auth/refresh`)
       expect(refreshCalls).toHaveLength(1)
     })
+
+    it('skips role and username cookies when the refresh response lacks them', async () => {
+      writeCookie('auth_token', 'old-access')
+      writeCookie('refresh_token', 'old-refresh')
+
+      fetchMock.mockImplementation(routeByUrl({
+        [`${API}/v1/common/auth/refresh`]: () => ok({ tokens: { access_token: 'new-access', refresh_token: 'new-refresh' } }),
+      }, failOnce(() => ok([{ uuid: 'u1' }]))))
+
+      const { data } = await useApi().get('/v1/panel/users')
+
+      expect(data.value).toStrictEqual([{ uuid: 'u1' }])
+      expect(readCookie('auth_token')).toBe('new-access')
+      expect(readCookie('refresh_token')).toBe('new-refresh')
+      expect(readCookie('user_role')).toBeNull()
+      expect(readCookie('user_name')).toBeNull()
+    })
   })
 })

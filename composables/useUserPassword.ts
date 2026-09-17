@@ -11,41 +11,14 @@ interface UserPasswordState {
 }
 
 export const useUserPassword = (): UserPasswordState => {
-  const { patch } = useApi()
-
-  const username = ref('')
   const password = ref('')
-  const saving = ref(false)
-  const error = ref('')
-  const changed = ref(false)
 
-  const valid = computed(() =>
-    username.value.trim() !== '' && password.value.length >= 6)
-
-  const submit = async (): Promise<void> => {
-    if (!valid.value || saving.value) return
-
-    saving.value = true
-    error.value = ''
-    changed.value = false
-
-    try {
-      const { error: err } = await patch(ApiEndpoint.AdminUserPassword, {
-        username: username.value.trim(),
-        password: password.value,
-      })
-
-      if (err.value) {
-        error.value = err.value
-      } else {
-        changed.value = true
-        username.value = ''
-        password.value = ''
-      }
-    } finally {
-      saving.value = false
-    }
-  }
+  const { username, saving, error, success: changed, valid, submit } = useUserAction({
+    endpoint: ApiEndpoint.AdminUserPassword,
+    buildBody: (name) => ({ username: name, password: password.value }),
+    isValid: (name) => name !== '' && password.value.length >= 6,
+    reset: () => { password.value = '' },
+  })
 
   return { username, password, saving, error, changed, valid, submit }
 }

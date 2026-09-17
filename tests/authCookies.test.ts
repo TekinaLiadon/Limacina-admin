@@ -45,4 +45,16 @@ describe('authCookies', () => {
     writeCookie('auth_token', 'value')
     expect(readCookie('auth_token')).toBe('value')
   })
+
+  it('is a no-op without document (SSR)', () => {
+    const originalDocument = globalThis.document
+    delete (globalThis as Record<string, unknown>).document
+
+    try {
+      expect(() => writeCookie('auth_token', 'token')).not.toThrow()
+      expect(readCookie('auth_token')).toBeNull()
+    } finally {
+      globalThis.document = originalDocument
+    }
+  })
 })

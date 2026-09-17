@@ -125,6 +125,13 @@ describe('formatJson', () => {
   it('handles numbers', () => {
     expect(formatJson(42)).toBe('42')
   })
+
+  it('falls back to String for unserializable values', () => {
+    const circular: Record<string, unknown> = {}
+    circular.self = circular
+
+    expect(formatJson(circular)).toBe(String(circular))
+  })
 })
 
 describe('reqHeaderPairs', () => {

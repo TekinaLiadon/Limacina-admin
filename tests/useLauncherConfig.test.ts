@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref, reactive } from 'vue'
 import { useApi } from '~/composables/useApi'
+import { useApiResource } from '~/composables/useApiResource'
 import { useLauncherConfig } from '~/composables/useLauncherConfig'
 import { API_FORMAT_ERROR, type LauncherConfig } from '~/api/types'
+import { ApiEndpoint } from '~/api/endpoints'
 
 const API = 'http://api.test'
 
@@ -19,6 +21,7 @@ vi.stubGlobal('$fetch', fetchMock)
 vi.stubGlobal('navigateTo', navigateMock)
 vi.stubGlobal('useRuntimeConfig', () => ({ public: { apiBase: API } }))
 vi.stubGlobal('useApi', useApi)
+vi.stubGlobal('useApiResource', useApiResource)
 vi.stubGlobal('ref', ref)
 vi.stubGlobal('reactive', reactive)
 
@@ -101,5 +104,59 @@ describe('useLauncherConfig', () => {
 
     expect(error.value).toBe('Внутренняя ошибка')
     expect(navigateMock).not.toHaveBeenCalled()
+  })
+
+  it('saves the form as a patch and reports an update', async () => {
+    fetchMock.mockResolvedValue(validConfig)
+
+    const { form, config, isNew, saving, saveError, saveSuccess, saveConfig } = useLauncherConfig()
+    form.projectName = 'limacina'
+    form.jvmArgs = '  -Xmx4G   -Xms2G  '
+    await saveConfig()
+
+    expect(saving.value).toBeFalsy()
+    expect(saveError.value).toBe('')
+    expect(saveSuccess.value).toBe('Конфиг обновлён')
+    expect(isNew.value).toBeFalsy()
+    expect(config.value).toStrictEqual(validConfig)
+
+    const [[url, opts]] = fetchMock.mock.calls
+    expect(url).toBe(`${API}${ApiEndpoint.AdminConfig}`)
+    expect(opts.method).toBe('PATCH')
+    expect(opts.body).toMatchObject({ projectName: 'limacina', jvmArgs: ['-Xmx4G', '-Xms2G'] })
+  })
+
+  it('reports a creation when saving a brand new config', async () => {
+    fetchMock.mockReturnValue(fail(404, { message: 'Not found' }))
+
+    const { isNew, saveSuccess, fetchConfig, saveConfig } = useLauncherConfig()
+    await fetchConfig()
+    expect(isNew.value).toBeTruthy()
+
+    fetchMock.mockResolvedValue(validConfig)
+    await saveConfig()
+
+    expect(saveSuccess.value).toBe('Конфиг создан')
+    expect(isNew.value).toBeFalsy()
+  })
+
+  it('surfaces a save error without reporting success', async () => {
+    fetchMock.mockReturnValue(fail(500, { message: 'Сбой сохранения' }))
+
+    const { saveError, saveSuccess, saveConfig } = useLauncherConfig()
+    await saveConfig()
+
+    expect(saveError.value).toBe('Сбой сохранения')
+    expect(saveSuccess.value).toBe('')
+  })
+
+  it('reports success without a config when the response has no body', async () => {
+    fetchMock.mockResolvedValue(null)
+
+    const { config, saveSuccess, saveConfig } = useLauncherConfig()
+    await saveConfig()
+
+    expect(saveSuccess.value).toBe('Конфиг обновлён')
+    expect(config.value).toBeNull()
   })
 })

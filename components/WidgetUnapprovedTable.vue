@@ -85,14 +85,9 @@ const userKey = (user: UserListItem): string => user.username
 .toolbar {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 16px;
 }
 
 .user-card {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -107,7 +102,6 @@ const userKey = (user: UserListItem): string => user.username
 
 .user-card-name {
   font-size: 0.875rem;
-  color: var(--text-bright);
 }
 
 .user-card-role {

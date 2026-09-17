@@ -1,5 +1,4 @@
 import { ApiEndpoint } from '~/api/endpoints'
-import { toFetchError } from '~/api/errors'
 import { API_FORMAT_ERROR, isLauncherConfig, type LauncherConfig } from '~/api/types'
 
 export type { LauncherConfig } from '~/api/types'
@@ -40,7 +39,7 @@ interface LauncherConfigState {
 }
 
 export const useLauncherConfig = (): LauncherConfigState => {
-  const { get, patch } = useApi()
+  const { patch } = useApi()
 
   const config = ref<LauncherConfig | null>(null)
   const isNew = ref(false)
@@ -52,38 +51,33 @@ export const useLauncherConfig = (): LauncherConfigState => {
   const saveError = ref('')
   const saveSuccess = ref('')
 
-  const fetchConfig = async (): Promise<void> => {
-    loading.value = true
-    error.value = ''
-
-    try {
-      const res = await get<LauncherConfig>(ApiEndpoint.LauncherConfig)
-
-      if (res.error.value && toFetchError(res.cause.value).statusCode !== 404) {
-        error.value = res.error.value
-      } else if (isLauncherConfig(res.data.value)) {
-        config.value = res.data.value
+  const fetchConfig = useApiResource<LauncherConfig>({
+    endpoint: ApiEndpoint.LauncherConfig,
+    loading,
+    error,
+    tolerate404: true,
+    handle: ({ data }) => {
+      if (isLauncherConfig(data.value)) {
+        config.value = data.value
         isNew.value = false
         Object.assign(form, {
-          projectName: config.value.projectName,
-          mcVersion: config.value.mcVersion,
-          modLoader: config.value.modLoader,
-          loaderVersion: config.value.loaderVersion,
-          minMemory: config.value.minMemory,
-          maxMemory: config.value.maxMemory,
-          online: config.value.online,
-          jvmArgs: config.value.jvmArgs.join(' '),
+          projectName: data.value.projectName,
+          mcVersion: data.value.mcVersion,
+          modLoader: data.value.modLoader,
+          loaderVersion: data.value.loaderVersion,
+          minMemory: data.value.minMemory,
+          maxMemory: data.value.maxMemory,
+          online: data.value.online,
+          jvmArgs: data.value.jvmArgs.join(' '),
         })
-      } else if (res.data.value) {
+      } else if (data.value) {
         error.value = API_FORMAT_ERROR
       } else {
         isNew.value = true
         Object.assign(form, defaultConfig())
       }
-    } finally {
-      loading.value = false
-    }
-  }
+    },
+  })
 
   const saveConfig = async (): Promise<void> => {
     saving.value = true

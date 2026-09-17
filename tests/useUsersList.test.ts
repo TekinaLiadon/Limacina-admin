@@ -152,4 +152,83 @@ describe('useUsersList', () => {
     expect(state.error.value).toBe('Внутренняя ошибка')
     expect(state.loading.value).toBeFalsy()
   })
+
+  it('resets to the first page and refetches after the search debounce', async () => {
+    fetchMock.mockResolvedValue(page([user('jane')], 1, 0))
+
+    const state = useUsersList<UserListItem>({
+      endpoint: ApiEndpoint.AdminUsers,
+      perPage: PER_PAGE,
+      withSearch: true,
+    })
+    state.page.value = 3
+    state.search.value = 'jan'
+
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1))
+
+    expect(state.page.value).toBe(1)
+    expect(offsetOf(fetchMock.mock.calls[0]?.[0])).toBe(0)
+    expect(fetchMock.mock.calls[0]?.[0]).toContain('username=jan')
+
+    state.search.value = ''
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
+    expect(fetchMock.mock.calls.at(-1)?.[0]).not.toContain('username')
+  })
+
+  it('runs a user action, calls the success hook and clears the busy flag', async () => {
+    const state = useUsersList<UserListItem>({ endpoint: ApiEndpoint.AdminUsers, perPage: PER_PAGE })
+    const busy = ref('')
+    const onSuccess = vi.fn<() => void>()
+
+    await state.runUserAction(
+      'john',
+      busy,
+      () => Promise.resolve({ error: ref<string | null>(null) }),
+      onSuccess,
+    )
+
+    expect(busy.value).toBe('')
+    expect(state.actionError.value).toBe('')
+    expect(onSuccess).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps the action error and skips the success hook on failure', async () => {
+    const state = useUsersList<UserListItem>({ endpoint: ApiEndpoint.AdminUsers, perPage: PER_PAGE })
+    const busy = ref('')
+    const onSuccess = vi.fn<() => void>()
+
+    await state.runUserAction(
+      'john',
+      busy,
+      () => Promise.resolve({ error: ref<string | null>('Действие запрещено') }),
+      onSuccess,
+    )
+
+    expect(busy.value).toBe('')
+    expect(state.actionError.value).toBe('Действие запрещено')
+    expect(onSuccess).not.toHaveBeenCalled()
+  })
+
+  it('keeps the state empty when the page response has no body', async () => {
+    fetchMock.mockResolvedValue(null)
+
+    const state = useUsersList<UserListItem>({ endpoint: ApiEndpoint.AdminUsers, perPage: PER_PAGE })
+    await state.fetchUsers()
+
+    expect(state.users.value).toStrictEqual([])
+    expect(state.total.value).toBe(0)
+    expect(state.error.value).toBe('')
+    expect(state.loading.value).toBeFalsy()
+  })
+
+  it('keeps the page when the list still has items after a removal', async () => {
+    fetchMock.mockResolvedValue(page([user('a'), user('b')], 40, 20))
+
+    const state = useUsersList<UserListItem>({ endpoint: ApiEndpoint.AdminUsers, perPage: PER_PAGE })
+    state.page.value = 2
+    await state.fetchUsers()
+    await state.refetchAfterRemoval()
+
+    expect(state.page.value).toBe(2)
+  })
 })
