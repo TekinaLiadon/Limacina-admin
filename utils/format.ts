@@ -6,5 +6,3 @@ export const formatDate = (date?: string): string => {
     year: 'numeric',
   })
 }
-
-export const capitalize = (value: string): string => value ? value.charAt(0).toUpperCase() + value.slice(1) : value

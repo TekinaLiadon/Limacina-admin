@@ -27,6 +27,3 @@ export const pageNumbers = (currentPage: number, totalPages: number): (number | 
 
   return pages
 }
-
-export const slicePage = <TItem>(items: TItem[], page: number, perPage: number): TItem[] =>
-  items.slice((page - 1) * perPage, page * perPage)

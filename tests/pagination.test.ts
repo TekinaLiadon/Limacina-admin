@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { clampPage, pageNumbers, slicePage, totalPagesOf } from '~/utils/pagination'
+import { clampPage, pageNumbers, totalPagesOf } from '~/utils/pagination'
 
 describe('totalPagesOf', () => {
   it('returns 0 for empty total', () => {
@@ -48,18 +48,5 @@ describe('pageNumbers', () => {
 
   it('keeps trailing pages when current is near end', () => {
     expect(pageNumbers(19, 20)).toStrictEqual([1, '...', 18, 19, 20])
-  })
-})
-
-describe('slicePage', () => {
-  it('slices the requested page', () => {
-    const items = [1, 2, 3, 4, 5]
-    expect(slicePage(items, 1, 2)).toStrictEqual([1, 2])
-    expect(slicePage(items, 2, 2)).toStrictEqual([3, 4])
-    expect(slicePage(items, 3, 2)).toStrictEqual([5])
-  })
-
-  it('returns empty slice beyond the end', () => {
-    expect(slicePage([1, 2], 5, 2)).toStrictEqual([])
   })
 })
