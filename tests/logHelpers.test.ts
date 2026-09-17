@@ -179,6 +179,48 @@ describe('reqHeaderPairs', () => {
     expect(pairs.find((header) => header.name === 'content-type')?.value).toBe('application/json')
   })
 
+  it('masks authorization and cookie values regardless of header name case', () => {
+    const entry: LogEntry = {
+      level: 30,
+      time: 0,
+      req: {
+        headers: {
+          Authorization: 'Bearer secret-token',
+          COOKIE: 'session=secret',
+          'Proxy-Authorization': 'Bearer proxy-secret',
+          'Content-Type': 'application/json',
+        },
+      },
+    }
+    const pairs = reqHeaderPairs(entry)
+    expect(pairs.find((header) => header.name === 'Authorization')?.value).toBe('***')
+    expect(pairs.find((header) => header.name === 'COOKIE')?.value).toBe('***')
+    expect(pairs.find((header) => header.name === 'Proxy-Authorization')?.value).toBe('***')
+    expect(pairs.find((header) => header.name === 'Content-Type')?.value).toBe('application/json')
+  })
+
+  it('filters hidden headers regardless of case', () => {
+    const entry: LogEntry = {
+      level: 30,
+      time: 0,
+      req: {
+        headers: {
+          Host: 'example.com',
+          CONNECTION: 'keep-alive',
+          'Accept-Encoding': 'gzip',
+          'Cache-Control': 'no-cache',
+          'Content-Type': 'application/json',
+        },
+      },
+    }
+    const names = reqHeaderPairs(entry).map((header) => header.name)
+    expect(names).not.toContain('Host')
+    expect(names).not.toContain('CONNECTION')
+    expect(names).not.toContain('Accept-Encoding')
+    expect(names).not.toContain('Cache-Control')
+    expect(names).toContain('Content-Type')
+  })
+
   it('sorts headers by name', () => {
     const entry: LogEntry = {
       level: 30,
@@ -220,6 +262,23 @@ describe('resHeaderPairs', () => {
     const pairs = resHeaderPairs(entry)
     expect(pairs.find((header) => header.name === 'set-cookie')?.value).toBe('***')
     expect(pairs.find((header) => header.name === 'content-type')?.value).toBe('application/json')
+  })
+
+  it('masks set-cookie values regardless of case', () => {
+    const entry: LogEntry = {
+      level: 30,
+      time: 0,
+      res: {
+        statusCode: 200,
+        headers: {
+          'Set-Cookie': 'sid=secret-session-id',
+          'Content-Type': 'application/json',
+        },
+      },
+    }
+    const pairs = resHeaderPairs(entry)
+    expect(pairs.find((header) => header.name === 'Set-Cookie')?.value).toBe('***')
+    expect(pairs.find((header) => header.name === 'Content-Type')?.value).toBe('application/json')
   })
 })
 

@@ -89,8 +89,9 @@ const MASKED_HEADERS = new Set(['authorization', 'proxy-authorization', 'cookie'
 const maskHeaders = (headers: Record<string, string>): Record<string, string> => {
   const filtered: Record<string, string> = {}
   for (const name of Object.keys(headers)) {
-    if (!HIDDEN_HEADERS.has(name)) {
-      filtered[name] = MASKED_HEADERS.has(name) ? '***' : headers[name]
+    const normalizedName = name.toLowerCase()
+    if (!HIDDEN_HEADERS.has(normalizedName)) {
+      filtered[name] = MASKED_HEADERS.has(normalizedName) ? '***' : headers[name]
     }
   }
   return filtered
