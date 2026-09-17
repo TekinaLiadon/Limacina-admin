@@ -1,5 +1,5 @@
 import type { ApiEndpoint } from '~/api/endpoints'
-import { isPage, PAGE_FORMAT_ERROR, type Page } from '~/api/types'
+import { isPage, API_FORMAT_ERROR, type Page } from '~/api/types'
 import type { QueryParams } from '~/api/query'
 import { clampPage, totalPagesOf } from '~/utils/pagination'
 import { debounce } from '~/utils/debounce'
@@ -65,7 +65,7 @@ export const useUsersList = <TItem>({ endpoint, perPage, withSearch = false, que
         total.value = data.value.total
         page.value = clampPage(page.value, totalPages.value)
       } else if (data.value) {
-        error.value = PAGE_FORMAT_ERROR
+        error.value = API_FORMAT_ERROR
       }
     } finally {
       loading.value = false

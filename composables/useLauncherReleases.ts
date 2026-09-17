@@ -1,6 +1,6 @@
 import { ApiEndpoint } from '~/api/endpoints'
 import {
-  UPDATER_FORMAT_ERROR,
+  API_FORMAT_ERROR,
   isUpdaterReleasesList,
   type UpdaterReleaseInfo,
   type UpdaterReleasesList,
@@ -32,7 +32,7 @@ export const useLauncherReleases = (): LauncherReleasesState => {
       } else if (isUpdaterReleasesList(res.data.value)) {
         releases.value = res.data.value.releases
       } else {
-        error.value = UPDATER_FORMAT_ERROR
+        error.value = API_FORMAT_ERROR
       }
     } finally {
       loading.value = false

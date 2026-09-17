@@ -28,7 +28,7 @@ export const isPage = <TItem>(value: unknown): value is Page<TItem> =>
   Array.isArray((value as Page<TItem>).items) &&
   typeof (value as Page<TItem>).total === 'number'
 
-export const PAGE_FORMAT_ERROR = 'API вернул некорректные данные'
+export const API_FORMAT_ERROR = 'API вернул некорректные данные'
 
 export interface UserListItem {
   uuid: string
@@ -79,8 +79,6 @@ export const isUpdaterReleasesList = (value: unknown): value is UpdaterReleasesL
   typeof value === 'object' && value !== null &&
   Array.isArray((value as UpdaterReleasesList).releases)
 
-export const UPDATER_FORMAT_ERROR = 'API вернул некорректные данные'
-
 export interface LauncherReleasePublished {
   version: string
   published: string[]
@@ -103,3 +101,14 @@ export interface LauncherConfig {
   maxMemory: string
   online: boolean
 }
+
+export const isLauncherConfig = (value: unknown): value is LauncherConfig =>
+  typeof value === 'object' && value !== null &&
+  typeof (value as LauncherConfig).projectName === 'string' &&
+  typeof (value as LauncherConfig).mcVersion === 'string' &&
+  typeof (value as LauncherConfig).modLoader === 'string' &&
+  typeof (value as LauncherConfig).loaderVersion === 'string' &&
+  typeof (value as LauncherConfig).minMemory === 'string' &&
+  typeof (value as LauncherConfig).maxMemory === 'string' &&
+  typeof (value as LauncherConfig).online === 'boolean' &&
+  Array.isArray((value as LauncherConfig).jvmArgs)

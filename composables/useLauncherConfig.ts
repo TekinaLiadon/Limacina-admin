@@ -1,6 +1,6 @@
 import { ApiEndpoint } from '~/api/endpoints'
 import { toFetchError } from '~/api/errors'
-import type { LauncherConfig } from '~/api/types'
+import { API_FORMAT_ERROR, isLauncherConfig, type LauncherConfig } from '~/api/types'
 
 export type { LauncherConfig } from '~/api/types'
 
@@ -61,19 +61,21 @@ export const useLauncherConfig = (): LauncherConfigState => {
 
       if (res.error.value && toFetchError(res.cause.value).statusCode !== 404) {
         error.value = res.error.value
-      } else if (res.data.value) {
+      } else if (isLauncherConfig(res.data.value)) {
         config.value = res.data.value
         isNew.value = false
         Object.assign(form, {
-          projectName: config.value.projectName || '',
-          mcVersion: config.value.mcVersion || '',
-          modLoader: config.value.modLoader || '',
-          loaderVersion: config.value.loaderVersion || '',
-          minMemory: config.value.minMemory || '',
-          maxMemory: config.value.maxMemory || '',
-          online: config.value.online ?? null,
-          jvmArgs: config.value.jvmArgs?.join(' ') || '',
+          projectName: config.value.projectName,
+          mcVersion: config.value.mcVersion,
+          modLoader: config.value.modLoader,
+          loaderVersion: config.value.loaderVersion,
+          minMemory: config.value.minMemory,
+          maxMemory: config.value.maxMemory,
+          online: config.value.online,
+          jvmArgs: config.value.jvmArgs.join(' '),
         })
+      } else if (res.data.value) {
+        error.value = API_FORMAT_ERROR
       } else {
         isNew.value = true
         Object.assign(form, defaultConfig())
