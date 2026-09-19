@@ -23,6 +23,12 @@ describe('apiEndpoint', () => {
     expect(ApiEndpoint.LauncherLatest).toBe('/v1/launcher/update/latest')
     expect(ApiEndpoint.LauncherReleases).toBe('/v1/launcher/update/releases')
   })
+
+  it('exposes rcon endpoints', () => {
+    expect(ApiEndpoint.ServerRconStatus).toBe('/v1/panel/server/rcon')
+    expect(ApiEndpoint.ServerRconCommands).toBe('/v1/panel/server/rcon/commands')
+    expect(ApiEndpoint.ServerRconExecute).toBe('/v1/panel/server/rcon/execute')
+  })
 })
 
 describe('endpointUrl', () => {

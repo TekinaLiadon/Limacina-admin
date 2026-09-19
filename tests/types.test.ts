@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest'
-import { isPage, isUpdaterReleasesList, isLauncherConfig } from '~/api/types'
+import {
+  isPage, isUpdaterReleasesList, isLauncherConfig,
+  isRconStatus, isRconCommands, isRconOutput,
+} from '~/api/types'
 
 describe('isPage', () => {
   it('accepts an object with items and total', () => {
@@ -71,5 +74,47 @@ describe('isLauncherConfig', () => {
 
   it('rejects a config with jvmArgs that is not an array', () => {
     expect(isLauncherConfig({ ...valid, jvmArgs: '-Xmx4G' })).toBeFalsy()
+  })
+})
+
+describe('isRconStatus', () => {
+  it('accepts an object with a boolean enabled flag', () => {
+    expect(isRconStatus({ enabled: true })).toBeTruthy()
+    expect(isRconStatus({ enabled: false })).toBeTruthy()
+  })
+
+  it('rejects null, primitives and a wrong enabled type', () => {
+    expect(isRconStatus(null)).toBeFalsy()
+    expect(isRconStatus('enabled')).toBeFalsy()
+    expect(isRconStatus({ enabled: 'yes' })).toBeFalsy()
+    expect(isRconStatus({})).toBeFalsy()
+  })
+})
+
+describe('isRconCommands', () => {
+  it('accepts an object with a string array', () => {
+    expect(isRconCommands({ commands: ['say', 'list'] })).toBeTruthy()
+    expect(isRconCommands({ commands: [] })).toBeTruthy()
+  })
+
+  it('rejects null, primitives and non-string items', () => {
+    expect(isRconCommands(null)).toBeFalsy()
+    expect(isRconCommands(42)).toBeFalsy()
+    expect(isRconCommands({ commands: 'say' })).toBeFalsy()
+    expect(isRconCommands({ commands: ['say', 42] })).toBeFalsy()
+    expect(isRconCommands({})).toBeFalsy()
+  })
+})
+
+describe('isRconOutput', () => {
+  it('accepts an object with a string output', () => {
+    expect(isRconOutput({ output: 'Сервер: hello' })).toBeTruthy()
+    expect(isRconOutput({ output: '' })).toBeTruthy()
+  })
+
+  it('rejects null, primitives and a wrong output type', () => {
+    expect(isRconOutput(null)).toBeFalsy()
+    expect(isRconOutput({})).toBeFalsy()
+    expect(isRconOutput({ output: 42 })).toBeFalsy()
   })
 })

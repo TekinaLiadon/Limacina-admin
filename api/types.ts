@@ -91,6 +91,31 @@ export interface RebuildStatus {
   revisionAfter: string | null
 }
 
+export interface RconStatus {
+  enabled: boolean
+}
+
+export const isRconStatus = (value: unknown): value is RconStatus =>
+  typeof value === 'object' && value !== null &&
+  typeof (value as RconStatus).enabled === 'boolean'
+
+export interface RconCommands {
+  commands: string[]
+}
+
+export const isRconCommands = (value: unknown): value is RconCommands =>
+  typeof value === 'object' && value !== null &&
+  Array.isArray((value as RconCommands).commands) &&
+  (value as RconCommands).commands.every((command) => typeof command === 'string')
+
+export interface RconOutput {
+  output: string
+}
+
+export const isRconOutput = (value: unknown): value is RconOutput =>
+  typeof value === 'object' && value !== null &&
+  typeof (value as RconOutput).output === 'string'
+
 export interface LauncherConfig {
   projectName: string
   mcVersion: string

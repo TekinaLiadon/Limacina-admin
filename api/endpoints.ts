@@ -19,6 +19,9 @@ export enum ApiEndpoint {
   AdminConfig = '/v1/panel/launcher/config',
   ServerRestart = '/v1/panel/server/restart',
   ServerRebuildStatus = '/v1/panel/server/rebuild',
+  ServerRconStatus = '/v1/panel/server/rcon',
+  ServerRconCommands = '/v1/panel/server/rcon/commands',
+  ServerRconExecute = '/v1/panel/server/rcon/execute',
 
   LauncherLatest = '/v1/launcher/update/latest',
   LauncherReleases = '/v1/launcher/update/releases',

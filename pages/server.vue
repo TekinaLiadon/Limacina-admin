@@ -25,6 +25,20 @@
       <AppAlert v-if="restartError" :message="restartError" type="error" />
     </div>
 
+    <WidgetRcon
+      v-model:command="rconCommand"
+      :status-loading="rconStatusLoading"
+      :status-error="rconStatusError"
+      :enabled="rconEnabled"
+      :commands="rconCommands"
+      :executing="rconExecuting"
+      :execute-error="rconExecuteError"
+      :journal="rconJournal"
+      @execute="executeRconCommand"
+      @select-hint="rconCommand = $event"
+      @clear-journal="clearRconJournal"
+    />
+
     <div class="card">
       <h2 class="widget-title">Смена пароля пользователя</h2>
       <div class="inline-form">
@@ -106,6 +120,14 @@ const {
   username: ownerUsername, granting, error: ownerError, granted: ownerGranted,
   valid: ownerValid, setOwner,
 } = useSetOwner()
+const {
+  statusLoading: rconStatusLoading, statusError: rconStatusError,
+  enabled: rconEnabled, commands: rconCommands, command: rconCommand,
+  executing: rconExecuting, executeError: rconExecuteError, journal: rconJournal,
+  fetchStatus: fetchRconStatus, execute: executeRconCommand, clearJournal: clearRconJournal,
+} = useRcon()
+
+onMounted(fetchRconStatus)
 
 const showRestartConfirm = ref(false)
 const pendingRebuild = ref(false)
