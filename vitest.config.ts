@@ -19,6 +19,7 @@ export default defineConfig({
         'composables/useApiResource.ts',
         'composables/useUserAction.ts',
         'composables/useLauncherConfig.ts',
+        'composables/useLauncherMods.ts',
         'composables/useLogs.ts',
         'composables/useUsersList.ts',
       ],

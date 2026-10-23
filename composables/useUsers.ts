@@ -1,5 +1,6 @@
 import { ApiEndpoint, endpointUrl } from '~/api/endpoints'
 import type { UserListItem } from '~/api/types'
+import { ROLE_COOKIE, readCookie } from '~/utils/authCookies'
 
 export type { UserListItem } from '~/api/types'
 
@@ -9,6 +10,8 @@ interface UsersState {
   users: Ref<UserListItem[]>
   page: Ref<number>
   search: Ref<string>
+  installIdSearch: Ref<string>
+  owner: boolean
   total: Ref<number>
   totalPages: ComputedRef<number>
   loading: Ref<boolean>
@@ -25,14 +28,16 @@ interface UsersState {
 
 export const useUsers = (): UsersState => {
   const { patch, del } = useApi()
+  const owner = readCookie(ROLE_COOKIE) === 'owner'
 
   const {
-    users, page, search, total, totalPages, loading, error, actionError,
+    users, page, search, installIdSearch, total, totalPages, loading, error, actionError,
     fetchUsers, goToPage, refetchAfterRemoval, runUserAction,
   } = useUsersList<UserListItem>({
     endpoint: ApiEndpoint.AdminUsers,
     perPage: USERS_PER_PAGE,
     withSearch: true,
+    withInstallIdSearch: owner,
   })
 
   const acting = ref('')
@@ -87,7 +92,7 @@ export const useUsers = (): UsersState => {
     )
 
   return {
-    users, page, search, total, totalPages, loading, error, acting, actionError,
+    users, page, search, installIdSearch, owner, total, totalPages, loading, error, acting, actionError,
     fetchUsers, goToPage, changeRole, changeApproved, changeBanned, deleteUser,
   }
 }

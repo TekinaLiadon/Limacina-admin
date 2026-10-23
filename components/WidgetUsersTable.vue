@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="toolbar">
+    <div class="toolbar users-toolbar">
       <div class="form-group search-group">
         <label for="users-search">Поиск</label>
         <input
@@ -12,6 +12,19 @@
           @input="$emit('update:search', ($event.target as HTMLInputElement).value)"
         >
       </div>
+
+      <div v-if="owner" class="form-group search-group">
+        <label for="users-install-id-search">ID установки</label>
+        <input
+          id="users-install-id-search"
+          type="text"
+          class="input"
+          :value="installIdSearch"
+          :maxlength="INSTALL_ID_SEARCH_MAX_LENGTH"
+          placeholder="Часть ID установки"
+          @input="onInstallIdInput"
+        >
+      </div>
     </div>
 
     <AppAlert v-if="actionError" :message="actionError" type="error" />
@@ -21,6 +34,12 @@
         <template #row="{ item }">
           <tr>
             <td>{{ item.username }}</td>
+            <td v-if="owner" class="install-id-cell">
+              <div v-if="item.installIds.length" class="install-ids">
+                <span v-for="installId in item.installIds" :key="installId">{{ installId }}</span>
+              </div>
+              <span v-else class="install-id-empty">—</span>
+            </td>
             <td>
               <template v-if="item.role === 'owner'">
                 <span class="badge badge-owner">owner</span>
@@ -81,6 +100,14 @@
             </div>
 
             <div class="user-card-fields">
+              <div v-if="owner" class="user-card-field">
+                <label>ID установки</label>
+                <div v-if="item.installIds.length" class="install-ids">
+                  <span v-for="installId in item.installIds" :key="installId">{{ installId }}</span>
+                </div>
+                <span v-else class="install-id-empty">—</span>
+              </div>
+
               <div class="user-card-field">
                 <label>Роль</label>
                 <select
@@ -152,11 +179,14 @@
 <script setup lang="ts">
 import type { UserListItem } from '~/api/types'
 import { USERS_PER_PAGE } from '~/composables/useUsers'
+import { INSTALL_ID_SEARCH_MAX_LENGTH, sanitizeInstallIdInput } from '~/utils/installId'
 
-defineProps<{
+const props = defineProps<{
   users: UserListItem[]
   page: number
   search: string
+  installIdSearch: string
+  owner: boolean
   total: number
   totalPages: number
   loading: boolean
@@ -165,22 +195,60 @@ defineProps<{
   actionError: string
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   goToPage: [page: number]
   'update:search': [value: string]
+  'update:installIdSearch': [value: string]
   changeRole: [user: UserListItem, role: string]
   changeApproved: [user: UserListItem, approved: boolean]
   changeBanned: [user: UserListItem, banned: boolean]
   deleteUser: [user: UserListItem]
 }>()
 
-const columns = ['Имя пользователя', 'Роль', 'Одобрение', 'Бан', '']
+const columns = computed<string[]>(() => [
+  'Имя пользователя',
+  ...(props.owner ? ['ID установки'] : []),
+  'Роль',
+  'Одобрение',
+  'Бан',
+  '',
+])
+
+const onInstallIdInput = (event: Event): void => {
+  const input = event.target as HTMLInputElement
+  input.value = sanitizeInstallIdInput(input.value)
+  emit('update:installIdSearch', input.value)
+}
 
 const userKey = (user: UserListItem): string => user.username
 </script>
 
 <style lang="scss" scoped>
 @use '~/assets/css/mixins' as *;
+
+.users-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.install-id-cell {
+  max-width: 300px;
+}
+
+.install-ids {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.install-id-empty {
+  color: var(--text-faint);
+}
 
 .user-card-delete {
   width: 100%;

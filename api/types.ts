@@ -36,6 +36,7 @@ export interface UserListItem {
   role: string
   approved: boolean
   banned: boolean
+  installIds: string[]
 }
 
 export interface DeletedUserListItem {
@@ -82,6 +83,30 @@ export const isUpdaterReleasesList = (value: unknown): value is UpdaterReleasesL
 export interface LauncherReleasePublished {
   version: string
   published: string[]
+}
+
+export interface ModFile {
+  name: string
+  size: number
+}
+
+export interface ModsList {
+  mods: ModFile[]
+}
+
+export interface ModsUploaded {
+  uploaded: string[]
+}
+
+const isModFile = (value: unknown): value is ModFile =>
+  typeof value === 'object' && value !== null &&
+  typeof (value as ModFile).name === 'string' &&
+  typeof (value as ModFile).size === 'number'
+
+export const isModsList = (value: unknown): value is ModsList => {
+  if (typeof value !== 'object' || value === null) return false
+  const { mods } = value as { mods: unknown }
+  return Array.isArray(mods) && mods.every((mod) => isModFile(mod))
 }
 
 export interface RebuildStatus {

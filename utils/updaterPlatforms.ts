@@ -20,6 +20,10 @@ export const updaterPlatformLabel = (key: string): string => {
 
 export const RELEASE_VERSION_PATTERN = /^\d+\.\d+\.\d+$/u
 
+export const RESERVED_RELEASE_VERSION = '0.0.0'
+
+export const MAX_RELEASE_SIGNATURE_BYTES = 64 * 1024
+
 export interface ReleasePairForm {
   artifact: File | null
   signature: File | null
@@ -36,10 +40,15 @@ export const validateReleaseForm = (
   pairs: Record<string, ReleasePairForm>,
 ): string => {
   if (!RELEASE_VERSION_PATTERN.test(version)) return 'Версия должна быть в формате x.x.x'
+  if (version === RESERVED_RELEASE_VERSION) return 'Версия 0.0.0 зарезервирована и не может быть опубликована'
   const complete = Object.values(pairs).filter((pair) => isCompleteReleasePair(pair)).length
   const touched = Object.values(pairs).filter((pair) => isTouchedReleasePair(pair)).length
   if (touched > complete) return 'Для каждой выбранной платформы нужны и артефакт, и подпись .sig'
   if (complete === 0) return 'Выберите файлы хотя бы для одной платформы'
+  const oversized = Object.values(pairs).some(
+    (pair) => pair.signature !== null && pair.signature.size > MAX_RELEASE_SIGNATURE_BYTES,
+  )
+  if (oversized) return 'Подпись .sig должна быть не больше 64 КБ'
   return ''
 }
 

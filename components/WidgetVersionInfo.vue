@@ -1,18 +1,29 @@
 <template>
   <div class="card">
-    <h2 class="widget-title">Актуальный релиз (latest.json)</h2>
-    <div v-if="latest" class="version-info">
+    <div class="card-head">
+      <h2 class="widget-title">
+        <template v-if="previewVersion">Просмотр релиза {{ previewVersion }} (latest.json)</template>
+        <template v-else>Актуальный релиз (latest.json)</template>
+      </h2>
+      <AppButton v-if="previewVersion" variant="ghost" size="sm" @click="$emit('clear-preview')">
+        К актуальной
+      </AppButton>
+    </div>
+
+    <AppSpinner v-if="previewLoading" />
+    <p v-else-if="previewError" class="alert alert-error">{{ previewError }}</p>
+    <div v-else-if="shown" class="version-info">
       <div class="version-row">
         <span class="config-label">Версия</span>
-        <span>{{ latest.version }}</span>
+        <span>{{ shown.version }}</span>
       </div>
       <div class="version-row">
         <span class="config-label">Опубликовано</span>
-        <span class="pub-date">{{ formatDate(latest.pub_date) }}</span>
+        <span class="pub-date">{{ formatDate(shown.pub_date) }}</span>
       </div>
       <div class="version-platforms">
         <a
-          v-for="(release, key) in latest.platforms"
+          v-for="(release, key) in shown.platforms"
           :key="key"
           :href="isSafeUrl(release.url) ? release.url : undefined"
           class="version-platform-card"
@@ -36,13 +47,35 @@ import { updaterPlatformLabel } from '~/utils/updaterPlatforms'
 import { isSafeUrl } from '~/utils/url'
 import { formatDate } from '~/utils/format'
 
-defineProps<{
+const props = defineProps<{
   latest: UpdaterLatest | null
+  preview: UpdaterLatest | null
+  previewVersion: string
+  previewLoading: boolean
+  previewError: string
 }>()
+
+defineEmits<{
+  'clear-preview': []
+}>()
+
+const shown = computed(() => (props.previewVersion ? props.preview : props.latest))
 </script>
 
 <style lang="scss" scoped>
 @use '~/assets/css/mixins' as *;
+
+.card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+
+  .widget-title {
+    margin-bottom: 0;
+  }
+}
 
 .version-info {
   display: flex;

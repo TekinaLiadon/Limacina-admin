@@ -24,6 +24,11 @@ describe('apiEndpoint', () => {
     expect(ApiEndpoint.LauncherReleases).toBe('/v1/launcher/update/releases')
   })
 
+  it('exposes launcher mods endpoints', () => {
+    expect(ApiEndpoint.AdminLauncherMods).toBe('/v1/panel/launcher/mods')
+    expect(ApiEndpoint.AdminLauncherMod).toBe('/v1/panel/launcher/mods/:name')
+  })
+
   it('exposes rcon endpoints', () => {
     expect(ApiEndpoint.ServerRconStatus).toBe('/v1/panel/server/rcon')
     expect(ApiEndpoint.ServerRconCommands).toBe('/v1/panel/server/rcon/commands')
@@ -42,6 +47,11 @@ describe('endpointUrl', () => {
 
   it('encodes path param values', () => {
     expect(endpointUrl(ApiEndpoint.AdminUser, { username: 'a b/c' })).toBe('/v1/panel/users/a%20b%2Fc')
+  })
+
+  it('substitutes and encodes the mod name', () => {
+    expect(endpointUrl(ApiEndpoint.AdminLauncherMod, { name: 'jei 1.jar' }))
+      .toBe('/v1/panel/launcher/mods/jei%201.jar')
   })
 
   it('leaves endpoints without params untouched', () => {

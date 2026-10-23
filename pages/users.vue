@@ -4,6 +4,8 @@
       :users="users"
       :page="page"
       :search="search"
+      :install-id-search="installIdSearch"
+      :owner="owner"
       :total="total"
       :total-pages="totalPages"
       :loading="loading"
@@ -12,6 +14,7 @@
       :action-error="actionError"
       @go-to-page="goToPage"
       @update:search="search = $event"
+      @update:install-id-search="installIdSearch = $event"
       @change-role="changeRole"
       @change-approved="changeApproved"
       @change-banned="changeBanned"
@@ -31,7 +34,7 @@ definePageMeta({
   layout: 'admin',
 })
 
-const { users, page, search, total, totalPages, loading, error, acting, actionError, fetchUsers, goToPage, changeRole, changeApproved, changeBanned, deleteUser } = useUsers()
+const { users, page, search, installIdSearch, owner, total, totalPages, loading, error, acting, actionError, fetchUsers, goToPage, changeRole, changeApproved, changeBanned, deleteUser } = useUsers()
 
 const showConfirm = ref(false)
 const deleteTarget = ref('')

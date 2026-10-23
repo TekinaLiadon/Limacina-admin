@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   isPage, isUpdaterReleasesList, isLauncherConfig,
-  isRconStatus, isRconCommands, isRconOutput,
+  isRconStatus, isRconCommands, isRconOutput, isModsList,
 } from '~/api/types'
 
 describe('isPage', () => {
@@ -74,6 +74,26 @@ describe('isLauncherConfig', () => {
 
   it('rejects a config with jvmArgs that is not an array', () => {
     expect(isLauncherConfig({ ...valid, jvmArgs: '-Xmx4G' })).toBeFalsy()
+  })
+})
+
+describe('isModsList', () => {
+  it('accepts an object with valid mod files', () => {
+    expect(isModsList({ mods: [{ name: 'jei.jar', size: 1024 }] })).toBeTruthy()
+    expect(isModsList({ mods: [] })).toBeTruthy()
+  })
+
+  it('rejects null, primitives and a non-array mods', () => {
+    expect(isModsList(null)).toBeFalsy()
+    expect(isModsList(42)).toBeFalsy()
+    expect(isModsList({ mods: 'jei.jar' })).toBeFalsy()
+    expect(isModsList({})).toBeFalsy()
+  })
+
+  it('rejects mod entries without a name or size', () => {
+    expect(isModsList({ mods: [{ name: 42, size: 1 }] })).toBeFalsy()
+    expect(isModsList({ mods: [{ name: 'jei.jar' }] })).toBeFalsy()
+    expect(isModsList({ mods: [null] })).toBeFalsy()
   })
 })
 

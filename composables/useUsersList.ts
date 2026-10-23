@@ -3,6 +3,7 @@ import { isPage, API_FORMAT_ERROR, type Page } from '~/api/types'
 import type { QueryParams } from '~/api/query'
 import { clampPage, totalPagesOf } from '~/utils/pagination'
 import { debounce } from '~/utils/debounce'
+import { normalizeInstallIdSearch } from '~/utils/installId'
 
 const SEARCH_DEBOUNCE_MS = 400
 
@@ -10,6 +11,7 @@ interface UsersListOptions {
   endpoint: ApiEndpoint
   perPage: number
   withSearch?: boolean
+  withInstallIdSearch?: boolean
   query?: () => QueryParams
 }
 
@@ -17,6 +19,7 @@ interface UsersListState<TItem> {
   users: Ref<TItem[]>
   page: Ref<number>
   search: Ref<string>
+  installIdSearch: Ref<string>
   total: Ref<number>
   totalPages: ComputedRef<number>
   loading: Ref<boolean>
@@ -33,12 +36,19 @@ interface UsersListState<TItem> {
   ) => Promise<void>
 }
 
-export const useUsersList = <TItem>({ endpoint, perPage, withSearch = false, query }: UsersListOptions): UsersListState<TItem> => {
+export const useUsersList = <TItem>({
+  endpoint,
+  perPage,
+  withSearch = false,
+  withInstallIdSearch = false,
+  query,
+}: UsersListOptions): UsersListState<TItem> => {
   const { get } = useApi()
 
   const users = ref<TItem[]>([]) as Ref<TItem[]>
   const page = ref(1)
   const search = ref('')
+  const installIdSearch = ref('')
   const total = ref(0)
   const loading = ref(true)
   const error = ref('')
@@ -59,6 +69,9 @@ export const useUsersList = <TItem>({ endpoint, perPage, withSearch = false, que
         limit: perPage,
         offset: (page.value - 1) * perPage,
         username: withSearch ? search.value.trim() || undefined : undefined,
+        installId: withInstallIdSearch
+          ? normalizeInstallIdSearch(installIdSearch.value) || undefined
+          : undefined,
         ...query?.(),
       })
 
@@ -94,6 +107,7 @@ export const useUsersList = <TItem>({ endpoint, perPage, withSearch = false, que
   }, SEARCH_DEBOUNCE_MS)
 
   if (withSearch) watch(search, () => applySearch())
+  if (withInstallIdSearch) watch(installIdSearch, () => applySearch())
   onScopeDispose(applySearch.cancel)
 
   const refetchAfterRemoval = async (): Promise<void> => {
@@ -123,7 +137,7 @@ export const useUsersList = <TItem>({ endpoint, perPage, withSearch = false, que
   }
 
   return {
-    users, page, search, total, totalPages, loading, error, actionError,
+    users, page, search, installIdSearch, total, totalPages, loading, error, actionError,
     fetchUsers, goToPage, refetchAfterRemoval, runUserAction,
   }
 }

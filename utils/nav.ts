@@ -9,7 +9,7 @@ export const navItems: NavItem[] = [
   { path: '/unapproved', label: 'Неодобренные' },
   { path: '/users', label: 'Пользователи' },
   { path: '/notifications', label: 'Нотификации', disabled: true },
-  { path: '/releases', label: 'Релизы' },
+  { path: '/releases', label: 'Релизы', ownerOnly: true },
   { path: '/logs', label: 'Логи' },
   { path: '/deleted', label: 'Удалённые', ownerOnly: true },
   { path: '/server', label: 'Сервер', ownerOnly: true },

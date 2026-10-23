@@ -16,6 +16,8 @@ export enum ApiEndpoint {
   AdminLogs = '/v1/panel/logs',
   AdminLogDates = '/v1/panel/logs/dates',
   AdminLauncherRelease = '/v1/panel/launcher/release',
+  AdminLauncherMods = '/v1/panel/launcher/mods',
+  AdminLauncherMod = '/v1/panel/launcher/mods/:name',
   AdminConfig = '/v1/panel/launcher/config',
   ServerRestart = '/v1/panel/server/restart',
   ServerRebuildStatus = '/v1/panel/server/rebuild',

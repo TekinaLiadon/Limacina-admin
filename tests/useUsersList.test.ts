@@ -33,6 +33,7 @@ const user = (username: string): UserListItem => ({
   role: 'user',
   approved: true,
   banned: false,
+  installIds: [],
 })
 
 const page = <TItem>(items: TItem[], total: number, offset: number): Page<TItem> => ({
@@ -173,6 +174,66 @@ describe('useUsersList', () => {
     state.search.value = ''
     await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
     expect(fetchMock.mock.calls.at(-1)?.[0]).not.toContain('username')
+  })
+
+  it('sends the install id search and resets to the first page after the debounce', async () => {
+    fetchMock.mockResolvedValue(page([user('john')], 1, 0))
+
+    const state = useUsersList<UserListItem>({
+      endpoint: ApiEndpoint.AdminUsers,
+      perPage: PER_PAGE,
+      withInstallIdSearch: true,
+    })
+    state.page.value = 3
+    state.installIdSearch.value = 'v1-0123456789abcdef0123456789abcdef'
+
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1))
+
+    expect(state.page.value).toBe(1)
+    expect(fetchMock.mock.calls[0]?.[0]).toContain(
+      'installId=v1-0123456789abcdef0123456789abcdef',
+    )
+  })
+
+  it('trims the install id search before sending it', async () => {
+    fetchMock.mockResolvedValue(page([user('john')], 1, 0))
+
+    const state = useUsersList<UserListItem>({
+      endpoint: ApiEndpoint.AdminUsers,
+      perPage: PER_PAGE,
+      withInstallIdSearch: true,
+    })
+    state.installIdSearch.value = '  v1-abc  '
+
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1))
+    expect(fetchMock.mock.calls[0]?.[0]).toContain('installId=v1-abc')
+  })
+
+  it('omits a malformed install id search', async () => {
+    fetchMock.mockResolvedValue(page([user('john')], 1, 0))
+
+    const state = useUsersList<UserListItem>({
+      endpoint: ApiEndpoint.AdminUsers,
+      perPage: PER_PAGE,
+      withInstallIdSearch: true,
+    })
+    state.installIdSearch.value = 'not an id!'
+
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1))
+    expect(fetchMock.mock.calls[0]?.[0]).not.toContain('installId')
+  })
+
+  it('does not send the install id search unless enabled', async () => {
+    fetchMock.mockResolvedValue(page([user('john')], 1, 0))
+
+    const state = useUsersList<UserListItem>({
+      endpoint: ApiEndpoint.AdminUsers,
+      perPage: PER_PAGE,
+    })
+    state.installIdSearch.value = 'v1-abc'
+    await state.fetchUsers()
+
+    expect(fetchMock.mock.calls[0]?.[0]).not.toContain('installId')
   })
 
   it('runs a user action, calls the success hook and clears the busy flag', async () => {

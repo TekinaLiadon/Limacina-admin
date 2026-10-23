@@ -16,9 +16,19 @@
             </span>
           </td>
           <td>
-            <a :href="latestJsonUrl(item.version)" class="latest-link" target="_blank" rel="noopener">
-              latest.json
-            </a>
+            <div class="release-actions">
+              <AppButton
+                variant="ghost"
+                size="sm"
+                :disabled="item.version === previewVersion"
+                @click="$emit('select', item.version)"
+              >
+                Просмотр
+              </AppButton>
+              <a :href="latestJsonUrl(item.version)" class="latest-link" target="_blank" rel="noopener">
+                latest.json
+              </a>
+            </div>
           </td>
         </tr>
       </template>
@@ -35,9 +45,19 @@
               {{ updaterPlatformLabel(key) }}
             </span>
           </div>
-          <a :href="latestJsonUrl(item.version)" class="latest-link" target="_blank" rel="noopener">
-            latest.json
-          </a>
+          <div class="release-actions">
+            <AppButton
+              variant="ghost"
+              size="sm"
+              :disabled="item.version === previewVersion"
+              @click="$emit('select', item.version)"
+            >
+              Просмотр
+            </AppButton>
+            <a :href="latestJsonUrl(item.version)" class="latest-link" target="_blank" rel="noopener">
+              latest.json
+            </a>
+          </div>
         </div>
       </template>
     </AppResponsiveList>
@@ -54,8 +74,13 @@ import { formatDate } from '~/utils/format'
 defineProps<{
   releases: UpdaterReleaseInfo[]
   latestVersion: string
+  previewVersion: string
   loading: boolean
   error: string
+}>()
+
+defineEmits<{
+  select: [version: string]
 }>()
 
 const config = useRuntimeConfig()
@@ -96,6 +121,12 @@ const latestJsonUrl = (version: string): string =>
     color: var(--primary);
     border-color: var(--primary);
   }
+}
+
+.release-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .release-card {

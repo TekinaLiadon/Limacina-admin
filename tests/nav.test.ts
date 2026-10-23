@@ -15,10 +15,10 @@ describe('navItems', () => {
     }
   })
 
-  it('hides deleted and server pages from non-owners', () => {
+  it('hides releases, deleted and server pages from non-owners', () => {
     const ownerOnly = navItems.filter((item) => item.ownerOnly).map((item) => item.path)
 
-    expect(ownerOnly).toStrictEqual(['/deleted', '/server'])
+    expect(ownerOnly).toStrictEqual(['/releases', '/deleted', '/server'])
   })
 
   it('marks only notifications as disabled', () => {

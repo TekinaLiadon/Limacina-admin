@@ -46,11 +46,21 @@ describe('updaterPlatformLabel', () => {
 })
 
 describe('validateReleaseForm', () => {
+  const completePairs = { 'windows-x86_64': pair(file('a.exe'), file('a.exe.sig')) }
+
   it('requires x.x.x version', () => {
-    const pairs = { 'windows-x86_64': pair(file('a.exe'), file('a.exe.sig')) }
-    expect(validateReleaseForm('1.0', pairs)).toContain('x.x.x')
-    expect(validateReleaseForm('v1.0.0', pairs)).toContain('x.x.x')
-    expect(validateReleaseForm('1.0.0', pairs)).toBe('')
+    expect(validateReleaseForm('1.0', completePairs)).toContain('x.x.x')
+    expect(validateReleaseForm('v1.0.0', completePairs)).toContain('x.x.x')
+    expect(validateReleaseForm('1.0.0', completePairs)).toBe('')
+  })
+
+  it('rejects the reserved version 0.0.0', () => {
+    expect(validateReleaseForm('0.0.0', completePairs)).toContain('зарезервирована')
+    expect(validateReleaseForm('0.0.0', {})).toContain('зарезервирована')
+  })
+
+  it('keeps zero-prefixed numeric versions valid', () => {
+    expect(validateReleaseForm('0.1.0', completePairs)).toBe('')
   })
 
   it('requires at least one complete pair', () => {
@@ -64,6 +74,20 @@ describe('validateReleaseForm', () => {
       'linux-x86_64': pair(file('b.AppImage'), file('b.AppImage.sig')),
     }
     expect(validateReleaseForm('1.0.0', pairs)).toContain('подпись')
+  })
+
+  it('rejects signatures larger than 64 KB', () => {
+    const big = new File(['x'.repeat(64 * 1024 + 1)], 'a.exe.sig', { type: 'application/octet-stream' })
+    const pairs = { 'windows-x86_64': pair(file('a.exe'), big) }
+
+    expect(validateReleaseForm('1.0.0', pairs)).toContain('64 КБ')
+  })
+
+  it('accepts a signature at the 64 KB limit', () => {
+    const max = new File(['x'.repeat(64 * 1024)], 'a.exe.sig', { type: 'application/octet-stream' })
+    const pairs = { 'windows-x86_64': pair(file('a.exe'), max) }
+
+    expect(validateReleaseForm('1.0.0', pairs)).toBe('')
   })
 })
 

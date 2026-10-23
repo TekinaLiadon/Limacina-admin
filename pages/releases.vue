@@ -1,7 +1,14 @@
 <template>
   <div>
     <AppDataState :loading="isLoading" :error="pageError">
-      <WidgetVersionInfo :latest="latest" />
+      <WidgetVersionInfo
+        :latest="latest"
+        :preview="preview"
+        :preview-version="previewVersion"
+        :preview-loading="previewLoading"
+        :preview-error="previewError"
+        @clear-preview="clearPreview"
+      />
 
       <WidgetReleaseUpload
         :form="publishForm"
@@ -15,8 +22,23 @@
       <WidgetReleaseHistory
         :releases="releases"
         :latest-version="latest?.version ?? ''"
+        :preview-version="previewVersion"
         :loading="historyLoading"
         :error="historyError"
+        @select="viewVersion"
+      />
+
+      <WidgetLauncherMods
+        :mods="mods"
+        :loading="modsLoading"
+        :error="modsError"
+        :uploading="uploading"
+        :upload-error="uploadError"
+        :upload-success="uploadSuccess"
+        :deleting="modDeleting"
+        :delete-error="deleteError"
+        @upload="uploadMods"
+        @delete="deleteMod"
       />
 
       <WidgetLauncherConfig
@@ -34,10 +56,14 @@
 <script setup lang="ts">
 definePageMeta({
   layout: 'admin',
+  middleware: 'owner',
 })
 
 const {
-  latest, loading: latestLoading, error: latestError, fetchLatest,
+  latest, preview, previewVersion,
+  loading: latestLoading, error: latestError,
+  previewLoading, previewError,
+  fetchLatest, viewVersion, clearPreview,
 } = useLauncherLatest()
 
 const {
@@ -53,6 +79,13 @@ const {
   saving, saveError, saveSuccess, fetchConfig, saveConfig,
 } = useLauncherConfig()
 
+const {
+  mods, loading: modsLoading, error: modsError,
+  uploading, uploadError, uploadSuccess,
+  deleting: modDeleting, deleteError,
+  fetchMods, uploadMods, deleteMod,
+} = useLauncherMods()
+
 const isLoading = computed(() => latestLoading.value || historyLoading.value || configLoading.value)
 const pageError = computed(() => latestError.value || historyError.value || configError.value)
 
@@ -64,6 +97,6 @@ const handlePublish = (): void => {
 }
 
 onMounted(async () => {
-  await Promise.all([fetchLatest(), fetchReleases(), fetchConfig()])
+  await Promise.all([fetchLatest(), fetchReleases(), fetchConfig(), fetchMods()])
 })
 </script>
